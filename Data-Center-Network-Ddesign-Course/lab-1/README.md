@@ -64,7 +64,7 @@ Border Leaf Loopacks:
 * ```10.101.133.0/30``` - vPC ЦОД-1, Leaf-3 to Leaf-4 (10.101.133.1 - 10.101.133.2)
 
 ---
-Cети P2P пиров, нумерация в октете идёт со стороны Spine:
+Cети P2P пиров, как и нумерация в октете идёт со стороны Spine:
 
 * ```10.101.214.0/30``` - сеть в ЦОД-1, Spine-1 до Leaf-1 (10.101.214.1  - 10.101.214.2)
 * ```10.101.214.4/30``` - сеть в ЦОД-1, Spine-1 до Leaf-2 (10.101.214.5  - 10.101.214.6)
@@ -94,108 +94,140 @@ Cети P2P пиров, нумерация в октете идёт со сто�
 
 ---
 
-Таким образом IP установлены следующим образом:
+### IP установлены следующим образом:
 
-Leaf-1:
+Leaf-R1# sh ip int br
 ```
 Interface            IP Address
 Lo1                  10.101.111.1
 Lo2                  10.101.112.1
-Eth1/1               10.101.214.1
-Eth1/2               10.101.224.1
+Eth1/1               10.101.214.2
+Eth1/2               10.101.224.2
+Eth1/15              10.101.113.1
 ```
-Leaf-2:
+
+Leaf-R2# sh ip int br
 ```
 Interface            IP Address
 Lo1                  10.101.121.1
 Lo2                  10.101.122.1
-Eth1/1               10.101.214.5
-Eth1/2               10.101.224.5
+Eth1/1               10.101.214.6
+Eth1/2               10.101.224.6
+Eth1/15              10.101.113.2
 ```
-Leaf-3:
+
+Leaf-R3# sh ip int br
 ```
 Interface            IP Address
 Lo1                  10.101.131.1
 Lo2                  10.101.132.1
-Eth1/1               10.101.214.9
-Eth1/2               10.101.224.9
+Eth1/1               10.101.214.10
+Eth1/2               10.101.224.10
+Eth1/15              10.101.133.1
 ```
-Leaf-4:
+
+Leaf-R4# sh ip int br
 ```
 Interface            IP Address
 Lo1                  10.101.141.1
 Lo2                  10.101.142.1
-Eth1/1               10.101.214.13
-Eth1/2               10.101.224.13
+Eth1/1               10.101.214.14
+Eth1/2               10.101.224.14
+Eth1/15              10.101.133.2
 ```
 
-Spine-1:
+Spine-R1# sh ip int br
 ```
 Interface            IP Address
 Lo1                  10.101.211.1
 Lo2                  10.101.212.1
-Eth1/1               10.101.214.2
-Eth1/2               10.101.214.6
-Eth1/3               10.101.214.10
-Eth1/4               10.101.214.14
-Eth1/6               10.101.14.2
-Eth1/7               10.101.14.6
+Eth1/1               10.101.214.1
+Eth1/2               10.101.214.5
+Eth1/3               10.101.214.9
+Eth1/4               10.101.214.13
+Eth1/6               10.101.14.1
+Eth1/7               10.101.14.5
 ```
 
-Spine-2:
+Spine-R2# sh ip int br
 ```
 Interface            IP Address
 Lo1                  10.101.221.1
 Lo2                  10.101.222.1
-Eth1/1               10.101.224.2
-Eth1/2               10.101.224.6
-Eth1/3               10.101.224.10
-Eth1/4               10.101.224.14
-Eth1/6               10.101.24.2
-Eth1/7               10.101.24.6
+Eth1/1               10.101.224.1
+Eth1/2               10.101.224.5
+Eth1/3               10.101.224.9
+Eth1/4               10.101.224.13
+Eth1/6               10.101.24.1
+Eth1/7               10.101.24.5
 ```
 
-Border Leaf-1:
+BRF-Leaf-R1# sh ip int br
 ```
 Interface            IP Address
 Lo1                  10.101.11.1
 Lo2                  10.101.12.1
-Eth1/1               10.101.14.1
-Eth1/2               10.101.24.1
+Eth1/1               10.101.14.2
+Eth1/2               10.101.24.2
 ```
 
-Border Leaf-2:
+BRD-Leaf-R2# sh ip int br
 ```
 Interface            IP Address
 Lo1                  10.101.21.1
 Lo2                  10.101.22.1
-Eth1/1               10.101.14.5
-Eth1/2               10.101.24.5
+Eth1/1               10.101.14.6
+Eth1/2               10.101.24.6
 ```
 
 ---
 
-Проверяем ping-ом все соседей, со стороны Spine-1:
+Проверяем ping-ом со стороны **Spine-1**:
 ```
-64 bytes from 10.101.214.1: icmp_seq=0 ttl=254 time=8.243 ms
-64 bytes from 10.101.214.5: icmp_seq=0 ttl=254 time=9.096 ms
-64 bytes from 10.101.214.9: icmp_seq=0 ttl=254 time=6.145 ms
-64 bytes from 10.101.214.13: icmp_seq=0 ttl=254 time=11.35 ms
-64 bytes from 10.101.14.1: icmp_seq=0 ttl=254 time=9.568 ms
-64 bytes from 10.101.14.5: icmp_seq=0 ttl=254 time=11.567 ms
-```
-Проверяем ping-ом все соседей, со стороны Spine-2:
-```
-64 bytes from 10.101.224.1: icmp_seq=0 ttl=254 time=10.141 ms
-64 bytes from 10.101.224.5: icmp_seq=0 ttl=254 time=7.68 ms
-64 bytes from 10.101.224.9: icmp_seq=0 ttl=254 time=7.369 ms
-64 bytes from 10.101.224.13: icmp_seq=0 ttl=254 time=3.866 ms
-64 bytes from 10.101.24.1: icmp_seq=0 ttl=254 time=6.388 ms
-64 bytes from 10.101.24.5: icmp_seq=0 ttl=254 time=5.311 ms
-```
-Все выполнено успешно.
+Spine-R1# ping 10.101.214.2 count 1
+64 bytes from 10.101.214.2: icmp_seq=0 ttl=254 time=6.557 ms
 
-Выполнено в GNS3:
+Spine-R1# ping 10.101.214.6 count 1
+64 bytes from 10.101.214.6: icmp_seq=0 ttl=254 time=7.713 ms
 
-![Топология-лайт](images/otus-lab1.png)
+Spine-R1# ping 10.101.214.10 count 1
+64 bytes from 10.101.214.10: icmp_seq=0 ttl=254 time=4.885 ms
+
+Spine-R1# ping 10.101.214.14 count 1
+64 bytes from 10.101.214.14: icmp_seq=0 ttl=254 time=5.437 ms
+
+Spine-R1# ping 10.101.14.2 count 1
+64 bytes from 10.101.14.2: icmp_seq=0 ttl=254 time=9.039 ms
+
+Spine-R1# ping 10.101.14.6 count 1
+64 bytes from 10.101.14.6: icmp_seq=0 ttl=254 time=9.829 ms
+```
+
+Проверяем ping-ом со стороны **Spine-2**:
+```
+Spine-R2# ping 10.101.224.1 count 1
+64 bytes from 10.101.224.1: icmp_seq=0 ttl=255 time=3.019 ms
+
+Spine-R2# ping 10.101.224.6 count 1
+64 bytes from 10.101.224.6: icmp_seq=0 ttl=254 time=5.24 ms
+
+Spine-R2# ping 10.101.224.10 count 1
+64 bytes from 10.101.224.10: icmp_seq=0 ttl=254 time=6.429 ms
+
+Spine-R2# ping 10.101.224.14 count 1
+64 bytes from 10.101.224.14: icmp_seq=0 ttl=254 time=5.468 ms
+
+Spine-R2# ping 10.101.24.2 count 1
+64 bytes from 10.101.24.2: icmp_seq=0 ttl=254 time=8.096 ms
+
+Spine-R2# ping 10.101.24.6 count 1
+64 bytes from 10.101.24.6: icmp_seq=0 ttl=254 time=8.76 ms
+```
+
+Все проверки связности выполнены успешно.
+
+### Выполнено в GNS3:
+
 ![Тпология-полная](images/otus-lab1-full.png)
+![Топология-лайт](images/otus-lab1.png)
+
