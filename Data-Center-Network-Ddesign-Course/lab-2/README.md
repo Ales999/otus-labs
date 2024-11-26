@@ -739,45 +739,1859 @@ Leaf-1
 </details>
 
 <details>
+
+```
+Leaf-R2# sh run
+
+!Command: show running-config
+!Running configuration last done at: Sat Nov 23 01:24:31 2024
+!Time: Tue Nov 26 23:46:42 2024
+
+version 9.3(8) Bios:version  
+hostname Leaf-R2
+vdc Leaf-R2 id 1
+  limit-resource vlan minimum 16 maximum 4094
+  limit-resource vrf minimum 2 maximum 4096
+  limit-resource port-channel minimum 0 maximum 511
+  limit-resource u4route-mem minimum 248 maximum 248
+  limit-resource u6route-mem minimum 96 maximum 96
+  limit-resource m4route-mem minimum 58 maximum 58
+  limit-resource m6route-mem minimum 8 maximum 8
+
+feature ospf
+clock timezone PRM 5 0
+
+no password strength-check
+username admin password 5 $5$GILIBL$I50uIEZ2.Id5WPuEW2/kF2LnprBS1fD4bK7PLYdXCs4  role network-admin
+no ip domain-lookup
+copp profile strict
+snmp-server user admin auth md5 042F0B626D2474725C91211D7B2226CDBDEA priv 040F77425611450B4490383F363A768CEBA9 localizedV2key engineID 128:0:0:9:3:12:22:0:0:27:1
+rmon event 1 log trap public description FATAL(1) owner PMON@FATAL
+rmon event 2 log trap public description CRITICAL(2) owner PMON@CRITICAL
+rmon event 3 log trap public description ERROR(3) owner PMON@ERROR
+rmon event 4 log trap public description WARNING(4) owner PMON@WARNING
+rmon event 5 log trap public description INFORMATION(5) owner PMON@INFO
+
+vlan 1
+
+vrf context VRF_VPC-KEEPALIVE
+  address-family ipv4 unicast
+vrf context management
+hardware access-list tcam region racl 256
+hardware access-list tcam region vpc-convergence 256
+
+
+interface Ethernet1/1
+  description to_spine_1
+  no switchport
+  ip address 10.101.214.6/30
+  ip ospf network point-to-point
+  no ip ospf passive-interface
+  ip router ospf UNDERLAY area 0.0.0.0
+  no shutdown
+
+interface Ethernet1/2
+  description to_spine_2
+  no switchport
+  ip address 10.101.224.6/30
+  ip ospf network point-to-point
+  no ip ospf passive-interface
+  ip router ospf UNDERLAY area 0.0.0.0
+  no shutdown
+
+interface Ethernet1/3
+  shutdown
+
+interface Ethernet1/4
+  shutdown
+
+interface Ethernet1/5
+  shutdown
+
+interface Ethernet1/6
+  shutdown
+
+interface Ethernet1/7
+  shutdown
+
+interface Ethernet1/8
+  shutdown
+
+interface Ethernet1/9
+  shutdown
+
+interface Ethernet1/10
+  shutdown
+
+interface Ethernet1/11
+  shutdown
+
+interface Ethernet1/12
+  shutdown
+
+interface Ethernet1/13
+  description vPC Po1 to leaf-1
+  shutdown
+
+interface Ethernet1/14
+  description vPC Po1 to leaf-1
+  shutdown
+
+interface Ethernet1/15
+  description vPC K/A to_leaf-1
+  no switchport
+  vrf member VRF_VPC-KEEPALIVE
+  ip address 10.101.113.2/30
+  no shutdown
+
+interface Ethernet1/16
+
+interface Ethernet1/17
+
+interface Ethernet1/18
+
+interface Ethernet1/19
+
+interface Ethernet1/20
+
+interface Ethernet1/21
+
+interface Ethernet1/22
+
+interface Ethernet1/23
+
+interface Ethernet1/24
+
+interface Ethernet1/25
+
+interface Ethernet1/26
+
+interface Ethernet1/27
+
+interface Ethernet1/28
+
+interface Ethernet1/29
+
+interface Ethernet1/30
+
+interface Ethernet1/31
+
+interface Ethernet1/32
+
+interface Ethernet1/33
+
+interface Ethernet1/34
+
+interface Ethernet1/35
+
+interface Ethernet1/36
+
+interface Ethernet1/37
+
+interface Ethernet1/38
+
+interface Ethernet1/39
+
+interface Ethernet1/40
+
+interface Ethernet1/41
+
+interface Ethernet1/42
+
+interface Ethernet1/43
+
+interface Ethernet1/44
+
+interface Ethernet1/45
+
+interface Ethernet1/46
+
+interface Ethernet1/47
+
+interface Ethernet1/48
+
+interface Ethernet1/49
+
+interface Ethernet1/50
+
+interface Ethernet1/51
+
+interface Ethernet1/52
+
+interface Ethernet1/53
+
+interface Ethernet1/54
+
+interface Ethernet1/55
+
+interface Ethernet1/56
+
+interface Ethernet1/57
+
+interface Ethernet1/58
+
+interface Ethernet1/59
+
+interface Ethernet1/60
+
+interface Ethernet1/61
+
+interface Ethernet1/62
+
+interface Ethernet1/63
+
+interface Ethernet1/64
+
+interface mgmt0
+  vrf member management
+
+interface loopback1
+  description # Router ID
+  ip address 10.101.121.1/32
+  ip router ospf UNDERLAY area 0.0.0.0
+
+interface loopback2
+  description # VTEP-ID
+  ip address 10.101.122.1/32
+icam monitor scale
+
+cli alias name wr copy run start
+cli alias name c conf term
+cli alias name sir show ip route
+line console
+  exec-timeout 0
+  terminal length 48
+  terminal width  186
+line vty
+boot nxos bootflash:/nxos.9.3.8.bin sup-1
+router ospf UNDERLAY
+  router-id 10.101.121.1
+  passive-interface default
+
+
+
+Leaf-R2#
+```
+
 <summary>
 Leaf-2
 <summary>
 </details>
 
 <details>
+
+```
+Leaf-R3# sh run
+
+!Command: show running-config
+!Running configuration last done at: Sat Nov 23 01:28:15 2024
+!Time: Tue Nov 26 23:46:46 2024
+
+version 9.3(8) Bios:version  
+hostname Leaf-R3
+vdc Leaf-R3 id 1
+  limit-resource vlan minimum 16 maximum 4094
+  limit-resource vrf minimum 2 maximum 4096
+  limit-resource port-channel minimum 0 maximum 511
+  limit-resource u4route-mem minimum 248 maximum 248
+  limit-resource u6route-mem minimum 96 maximum 96
+  limit-resource m4route-mem minimum 58 maximum 58
+  limit-resource m6route-mem minimum 8 maximum 8
+
+feature ospf
+clock timezone PRM 5 0
+
+no password strength-check
+username admin password 5 $5$MLCBMA$/FmotzYqQwdMEJQGtVLJtp3JkUAzX/Me2FliX2AYk38  role network-admin
+ip domain-lookup
+copp profile strict
+snmp-server user admin auth md5 0071FC9DD80C21F0E05AEDD7D7A8ADA024A4 priv 3209C8E6BC345CF9ED32FE94D0BCAA9125B4 localizedV2key engineID 128:0:0:9:3:12:56:0:0:27:1
+rmon event 1 log trap public description FATAL(1) owner PMON@FATAL
+rmon event 2 log trap public description CRITICAL(2) owner PMON@CRITICAL
+rmon event 3 log trap public description ERROR(3) owner PMON@ERROR
+rmon event 4 log trap public description WARNING(4) owner PMON@WARNING
+rmon event 5 log trap public description INFORMATION(5) owner PMON@INFO
+
+vlan 1
+
+vrf context VRF_VPC-KEEPALIVE
+vrf context management
+
+interface Ethernet1/1
+  description to_spine_1
+  no switchport
+  ip address 10.101.214.10/30
+  ip ospf network point-to-point
+  no ip ospf passive-interface
+  ip router ospf UNDERLAY area 0.0.0.0
+  no shutdown
+
+interface Ethernet1/2
+  description to_spine_2
+  no switchport
+  ip address 10.101.224.10/30
+  ip ospf network point-to-point
+  no ip ospf passive-interface
+  ip router ospf UNDERLAY area 0.0.0.0
+  no shutdown
+
+interface Ethernet1/3
+  shutdown
+
+interface Ethernet1/4
+  shutdown
+
+interface Ethernet1/5
+  shutdown
+
+interface Ethernet1/6
+  shutdown
+
+interface Ethernet1/7
+  shutdown
+
+interface Ethernet1/8
+  shutdown
+
+interface Ethernet1/9
+  shutdown
+
+interface Ethernet1/10
+  shutdown
+
+interface Ethernet1/11
+  shutdown
+
+interface Ethernet1/12
+  shutdown
+
+interface Ethernet1/13
+  description vPC Po1 to_leaf-4
+  shutdown
+
+interface Ethernet1/14
+  description vPC Po1 to_leaf-4
+  shutdown
+
+interface Ethernet1/15
+  description vPC K/A to_leaf-4
+  no switchport
+  vrf member VRF_VPC-KEEPALIVE
+  ip address 10.101.133.1/30
+  no shutdown
+
+interface Ethernet1/16
+
+interface Ethernet1/17
+
+interface Ethernet1/18
+
+interface Ethernet1/19
+
+interface Ethernet1/20
+
+interface Ethernet1/21
+
+interface Ethernet1/22
+
+interface Ethernet1/23
+
+interface Ethernet1/24
+
+interface Ethernet1/25
+
+interface Ethernet1/26
+
+interface Ethernet1/27
+
+interface Ethernet1/28
+
+interface Ethernet1/29
+
+interface Ethernet1/30
+
+interface Ethernet1/31
+
+interface Ethernet1/32
+
+interface Ethernet1/33
+
+interface Ethernet1/34
+
+interface Ethernet1/35
+
+interface Ethernet1/36
+
+interface Ethernet1/37
+
+interface Ethernet1/38
+
+interface Ethernet1/39
+
+interface Ethernet1/40
+
+interface Ethernet1/41
+
+interface Ethernet1/42
+
+interface Ethernet1/43
+
+interface Ethernet1/44
+
+interface Ethernet1/45
+
+interface Ethernet1/46
+
+interface Ethernet1/47
+
+interface Ethernet1/48
+
+interface Ethernet1/49
+
+interface Ethernet1/50
+
+interface Ethernet1/51
+
+interface Ethernet1/52
+
+interface Ethernet1/53
+
+interface Ethernet1/54
+
+interface Ethernet1/55
+
+interface Ethernet1/56
+
+interface Ethernet1/57
+
+interface Ethernet1/58
+
+interface Ethernet1/59
+
+interface Ethernet1/60
+
+interface Ethernet1/61
+
+interface Ethernet1/62
+
+interface Ethernet1/63
+
+interface Ethernet1/64
+
+interface mgmt0
+  vrf member management
+
+interface loopback1
+  description # Router-ID
+  ip address 10.101.131.1/32
+  ip router ospf UNDERLAY area 0.0.0.0
+
+interface loopback2
+  description # VTEP-ID
+  ip address 10.101.132.1/32
+icam monitor scale
+
+cli alias name wr copy run start
+cli alias name c conf term
+cli alias name sir show ip route
+line console
+  exec-timeout 0
+  terminal length 48
+  terminal width  186
+line vty
+boot nxos bootflash:/nxos.9.3.8.bin sup-1
+router ospf UNDERLAY
+  router-id 10.101.131.1
+  passive-interface default
+
+
+
+Leaf-R3#
+```
+
 <summary>
 Leaf-3
 <summary>
 </details>
 
 <details>
+
+```
+Leaf-R4# sh run
+
+!Command: show running-config
+!Running configuration last done at: Sat Nov 23 01:52:01 2024
+!Time: Tue Nov 26 23:47:39 2024
+
+version 9.3(8) Bios:version  
+hostname Leaf-R4
+vdc Leaf-R4 id 1
+  limit-resource vlan minimum 16 maximum 4094
+  limit-resource vrf minimum 2 maximum 4096
+  limit-resource port-channel minimum 0 maximum 511
+  limit-resource u4route-mem minimum 248 maximum 248
+  limit-resource u6route-mem minimum 96 maximum 96
+  limit-resource m4route-mem minimum 58 maximum 58
+  limit-resource m6route-mem minimum 8 maximum 8
+
+feature ospf
+clock timezone PRM 5 0
+
+no password strength-check
+username admin password 5 $5$BDBCEE$74zNdCRevQ.jaXtPvMgU3sqqUKyzxCYbO8iNikWmj9D  role network-admin
+ip domain-lookup
+copp profile strict
+snmp-server user admin auth md5 494710BA78F370F1A7A09EC13507B82FC249 priv 1748459848CB1184D7D38CC22B7CFB659E0B localizedV2key engineID 128:0:0:9:3:12:37:0:0:27:1
+rmon event 1 log trap public description FATAL(1) owner PMON@FATAL
+rmon event 2 log trap public description CRITICAL(2) owner PMON@CRITICAL
+rmon event 3 log trap public description ERROR(3) owner PMON@ERROR
+rmon event 4 log trap public description WARNING(4) owner PMON@WARNING
+rmon event 5 log trap public description INFORMATION(5) owner PMON@INFO
+
+vlan 1
+
+vrf context VRF_VPC-KEEPALIVE
+vrf context management
+
+interface Ethernet1/1
+  description to_spine_1
+  no switchport
+  ip address 10.101.214.14/30
+  ip ospf network point-to-point
+  no ip ospf passive-interface
+  ip router ospf UNDERLAY area 0.0.0.0
+  no shutdown
+
+interface Ethernet1/2
+  description to_spine_2
+  no switchport
+  ip address 10.101.224.14/30
+  ip ospf network point-to-point
+  no ip ospf passive-interface
+  ip router ospf UNDERLAY area 0.0.0.0
+  no shutdown
+
+interface Ethernet1/3
+  shutdown
+
+interface Ethernet1/4
+  shutdown
+
+interface Ethernet1/5
+  shutdown
+
+interface Ethernet1/6
+  shutdown
+
+interface Ethernet1/7
+  shutdown
+
+interface Ethernet1/8
+  shutdown
+
+interface Ethernet1/9
+  shutdown
+
+interface Ethernet1/10
+  shutdown
+
+interface Ethernet1/11
+  shutdown
+
+interface Ethernet1/12
+  shutdown
+
+interface Ethernet1/13
+  description vPC Po1 to_leaf-3
+  shutdown
+
+interface Ethernet1/14
+  description vPC Po1 to_leaf-3
+  shutdown
+
+interface Ethernet1/15
+  description vPC K/A to_leaf-3
+  no switchport
+  vrf member VRF_VPC-KEEPALIVE
+  ip address 10.101.133.2/30
+  no shutdown
+
+interface Ethernet1/16
+
+interface Ethernet1/17
+
+interface Ethernet1/18
+
+interface Ethernet1/19
+
+interface Ethernet1/20
+
+interface Ethernet1/21
+
+interface Ethernet1/22
+
+interface Ethernet1/23
+
+interface Ethernet1/24
+
+interface Ethernet1/25
+
+interface Ethernet1/26
+
+interface Ethernet1/27
+
+interface Ethernet1/28
+
+interface Ethernet1/29
+
+interface Ethernet1/30
+
+interface Ethernet1/31
+
+interface Ethernet1/32
+
+interface Ethernet1/33
+
+interface Ethernet1/34
+
+interface Ethernet1/35
+
+interface Ethernet1/36
+
+interface Ethernet1/37
+
+interface Ethernet1/38
+
+interface Ethernet1/39
+
+interface Ethernet1/40
+
+interface Ethernet1/41
+
+interface Ethernet1/42
+
+interface Ethernet1/43
+
+interface Ethernet1/44
+
+interface Ethernet1/45
+
+interface Ethernet1/46
+
+interface Ethernet1/47
+
+interface Ethernet1/48
+
+interface Ethernet1/49
+
+interface Ethernet1/50
+
+interface Ethernet1/51
+
+interface Ethernet1/52
+
+interface Ethernet1/53
+
+interface Ethernet1/54
+
+interface Ethernet1/55
+
+interface Ethernet1/56
+
+interface Ethernet1/57
+
+interface Ethernet1/58
+
+interface Ethernet1/59
+
+interface Ethernet1/60
+
+interface Ethernet1/61
+
+interface Ethernet1/62
+
+interface Ethernet1/63
+
+interface Ethernet1/64
+
+interface mgmt0
+  vrf member management
+
+interface loopback1
+  description # Router-ID
+  ip address 10.101.141.1/32
+  ip router ospf UNDERLAY area 0.0.0.0
+
+interface loopback2
+  description # VTEP-ID
+  ip address 10.101.142.1/32
+icam monitor scale
+
+cli alias name wr copy run start
+cli alias name c conf term
+cli alias name sir show ip route
+line console
+  exec-timeout 0
+  terminal length 48
+  terminal width  186
+line vty
+boot nxos bootflash:/nxos.9.3.8.bin sup-1
+router ospf UNDERLAY
+  router-id 10.101.141.1
+  passive-interface default
+
+
+
+Leaf-R4#
+```
+
 <summary>
 Leaf-4
 <summary>
 </details>
 
 <details>
+
+```
+Spine-R1# sh run
+
+!Command: show running-config
+!Running configuration last done at: Tue Nov 26 23:07:47 2024
+!Time: Tue Nov 26 23:50:13 2024
+
+version 9.3(8) Bios:version  
+hostname Spine-R1
+vdc Spine-R1 id 1
+  limit-resource vlan minimum 16 maximum 4094
+  limit-resource vrf minimum 2 maximum 4096
+  limit-resource port-channel minimum 0 maximum 511
+  limit-resource u4route-mem minimum 248 maximum 248
+  limit-resource u6route-mem minimum 96 maximum 96
+  limit-resource m4route-mem minimum 58 maximum 58
+  limit-resource m6route-mem minimum 8 maximum 8
+
+feature ospf
+clock timezone PRM 5 0
+
+no password strength-check
+username admin password 5 $5$OIECKA$eCLImHYIAUQ9wzeor80qlwAVQYm/.ZlN27uAmI7/1IB  role network-admin
+no ip domain-lookup
+copp profile strict
+snmp-server user admin auth md5 055F766176D1E6DAD4EE126B80F38ACA8E66 priv 483F7A661AC389D78EE04856D6ACADB9EA76 localizedV2key engineID 128:0:0:9:3:12:216:0:0:27:1
+rmon event 1 log trap public description FATAL(1) owner PMON@FATAL
+rmon event 2 log trap public description CRITICAL(2) owner PMON@CRITICAL
+rmon event 3 log trap public description ERROR(3) owner PMON@ERROR
+rmon event 4 log trap public description WARNING(4) owner PMON@WARNING
+rmon event 5 log trap public description INFORMATION(5) owner PMON@INFO
+
+vlan 1
+
+vrf context management
+
+interface Ethernet1/1
+  description to_leaf_1
+  no switchport
+  ip address 10.101.214.1/30
+  ip ospf network point-to-point
+  no ip ospf passive-interface
+  ip router ospf UNDERLAY area 0.0.0.0
+  no shutdown
+
+interface Ethernet1/2
+  description to_leaf_2
+  no switchport
+  ip address 10.101.214.5/30
+  ip ospf network point-to-point
+  no ip ospf passive-interface
+  ip router ospf UNDERLAY area 0.0.0.0
+  no shutdown
+
+interface Ethernet1/3
+  description to_leaf_3
+  no switchport
+  ip address 10.101.214.9/30
+  ip ospf network point-to-point
+  no ip ospf passive-interface
+  ip router ospf UNDERLAY area 0.0.0.0
+  no shutdown
+
+interface Ethernet1/4
+  description to_leaf_4
+  no switchport
+  ip address 10.101.214.13/30
+  ip ospf network point-to-point
+  no ip ospf passive-interface
+  ip router ospf UNDERLAY area 0.0.0.0
+  no shutdown
+
+interface Ethernet1/5
+  shutdown
+
+interface Ethernet1/6
+  description to_brdleaf-1
+  no switchport
+  ip address 10.101.14.1/30
+  ip ospf network point-to-point
+  no ip ospf passive-interface
+  ip router ospf UNDERLAY area 0.0.0.0
+  no shutdown
+
+interface Ethernet1/7
+  description to_brdleaf-2
+  no switchport
+  ip address 10.101.14.5/30
+  ip ospf network point-to-point
+  no ip ospf passive-interface
+  ip router ospf UNDERLAY area 0.0.0.0
+  no shutdown
+
+interface Ethernet1/8
+  shutdown
+
+interface Ethernet1/9
+  shutdown
+
+interface Ethernet1/10
+
+interface Ethernet1/11
+
+interface Ethernet1/12
+
+interface Ethernet1/13
+
+interface Ethernet1/14
+
+interface Ethernet1/15
+
+interface Ethernet1/16
+
+interface Ethernet1/17
+
+interface Ethernet1/18
+
+interface Ethernet1/19
+
+interface Ethernet1/20
+
+interface Ethernet1/21
+
+interface Ethernet1/22
+
+interface Ethernet1/23
+
+interface Ethernet1/24
+
+interface Ethernet1/25
+
+interface Ethernet1/26
+
+interface Ethernet1/27
+
+interface Ethernet1/28
+
+interface Ethernet1/29
+
+interface Ethernet1/30
+
+interface Ethernet1/31
+
+interface Ethernet1/32
+
+interface Ethernet1/33
+
+interface Ethernet1/34
+
+interface Ethernet1/35
+
+interface Ethernet1/36
+
+interface Ethernet1/37
+
+interface Ethernet1/38
+
+interface Ethernet1/39
+
+interface Ethernet1/40
+
+interface Ethernet1/41
+
+interface Ethernet1/42
+
+interface Ethernet1/43
+
+interface Ethernet1/44
+
+interface Ethernet1/45
+
+interface Ethernet1/46
+
+interface Ethernet1/47
+
+interface Ethernet1/48
+
+interface Ethernet1/49
+
+interface Ethernet1/50
+
+interface Ethernet1/51
+
+interface Ethernet1/52
+
+interface Ethernet1/53
+
+interface Ethernet1/54
+
+interface Ethernet1/55
+
+interface Ethernet1/56
+
+interface Ethernet1/57
+
+interface Ethernet1/58
+
+interface Ethernet1/59
+
+interface Ethernet1/60
+
+interface Ethernet1/61
+
+interface Ethernet1/62
+
+interface Ethernet1/63
+
+interface Ethernet1/64
+
+interface mgmt0
+  vrf member management
+
+interface loopback1
+  description # Router ID
+  ip address 10.101.211.1/32
+  ip router ospf UNDERLAY area 0.0.0.0
+
+interface loopback2
+  description # VTEP-ID
+  ip address 10.101.212.1/32
+icam monitor scale
+
+cli alias name wr copy run start
+cli alias name c conf term
+cli alias name sir show ip route
+cli alias name cef show forwarding ipv4 
+cli alias name adj show ip adj
+cli alias name hash show routing hash
+cli alias name fadj show forwarding adjacency
+cli alias name srr show run | sec router
+line console
+  exec-timeout 0
+  terminal length 48
+  terminal width  186
+line vty
+boot nxos bootflash:/nxos.9.3.8.bin sup-1
+router ospf UNDERLAY
+  router-id 10.101.211.1
+  maximum-paths 2
+  passive-interface default
+
+
+
+Spine-R1#
+```
+
 <summary>
-Spine--1
+Spine-1
 <summary>
 </details>
 
 <details>
+
+```
+Spine-R2# sh run
+
+!Command: show running-config
+!Running configuration last done at: Tue Nov 26 18:08:23 2024
+!Time: Tue Nov 26 18:51:42 2024
+
+version 9.3(8) Bios:version  
+hostname Spine-R2
+vdc Spine-R2 id 1
+  limit-resource vlan minimum 16 maximum 4094
+  limit-resource vrf minimum 2 maximum 4096
+  limit-resource port-channel minimum 0 maximum 511
+  limit-resource u4route-mem minimum 248 maximum 248
+  limit-resource u6route-mem minimum 96 maximum 96
+  limit-resource m4route-mem minimum 58 maximum 58
+  limit-resource m6route-mem minimum 8 maximum 8
+
+feature ospf
+
+no password strength-check
+username admin password 5 $5$PEIEFP$MPKQtVARlyYowD1AGfD7kttGnjbI5D92bO1H5HAKt4C  role network-admin
+ip domain-lookup
+copp profile strict
+snmp-server user admin auth md5 1779710CBD3CD4D9906FA7637BD9A4AAC204 priv 4973727EC11CEFECA116BF6262FBE9B29245 localizedV2key engineID 128:0:0:9:3:12:251:0:0:27:1
+rmon event 1 log trap public description FATAL(1) owner PMON@FATAL
+rmon event 2 log trap public description CRITICAL(2) owner PMON@CRITICAL
+rmon event 3 log trap public description ERROR(3) owner PMON@ERROR
+rmon event 4 log trap public description WARNING(4) owner PMON@WARNING
+rmon event 5 log trap public description INFORMATION(5) owner PMON@INFO
+
+vlan 1
+
+vrf context management
+
+interface Ethernet1/1
+  description to_leaf_1
+  no switchport
+  ip address 10.101.224.1/30
+  ip ospf network point-to-point
+  no ip ospf passive-interface
+  ip router ospf UNDERLAY area 0.0.0.0
+  no shutdown
+
+interface Ethernet1/2
+  description to_leaf_2
+  no switchport
+  ip address 10.101.224.5/30
+  ip ospf network point-to-point
+  no ip ospf passive-interface
+  ip router ospf UNDERLAY area 0.0.0.0
+  no shutdown
+
+interface Ethernet1/3
+  description to_leaf_3
+  no switchport
+  ip address 10.101.224.9/30
+  ip ospf network point-to-point
+  no ip ospf passive-interface
+  ip router ospf UNDERLAY area 0.0.0.0
+  no shutdown
+
+interface Ethernet1/4
+  description to_leaf_4
+  no switchport
+  ip address 10.101.224.13/30
+  ip ospf network point-to-point
+  no ip ospf passive-interface
+  ip router ospf UNDERLAY area 0.0.0.0
+  no shutdown
+
+interface Ethernet1/5
+  shutdown
+
+interface Ethernet1/6
+  description to_brdleaf-1
+  no switchport
+  ip address 10.101.24.1/30
+  ip ospf network point-to-point
+  no ip ospf passive-interface
+  ip router ospf UNDERLAY area 0.0.0.0
+  no shutdown
+
+interface Ethernet1/7
+  description to_brdleaf-2
+  no switchport
+  ip address 10.101.24.5/30
+  ip ospf network point-to-point
+  no ip ospf passive-interface
+  ip router ospf UNDERLAY area 0.0.0.0
+  no shutdown
+
+interface Ethernet1/8
+  shutdown
+
+interface Ethernet1/9
+  shutdown
+
+interface Ethernet1/10
+
+interface Ethernet1/11
+
+interface Ethernet1/12
+
+interface Ethernet1/13
+
+interface Ethernet1/14
+
+interface Ethernet1/15
+
+interface Ethernet1/16
+
+interface Ethernet1/17
+
+interface Ethernet1/18
+
+interface Ethernet1/19
+
+interface Ethernet1/20
+
+interface Ethernet1/21
+
+interface Ethernet1/22
+
+interface Ethernet1/23
+
+interface Ethernet1/24
+
+interface Ethernet1/25
+
+interface Ethernet1/26
+
+interface Ethernet1/27
+
+interface Ethernet1/28
+
+interface Ethernet1/29
+
+interface Ethernet1/30
+
+interface Ethernet1/31
+
+interface Ethernet1/32
+
+interface Ethernet1/33
+
+interface Ethernet1/34
+
+interface Ethernet1/35
+
+interface Ethernet1/36
+
+interface Ethernet1/37
+
+interface Ethernet1/38
+
+interface Ethernet1/39
+
+interface Ethernet1/40
+
+interface Ethernet1/41
+
+interface Ethernet1/42
+
+interface Ethernet1/43
+
+interface Ethernet1/44
+
+interface Ethernet1/45
+
+interface Ethernet1/46
+
+interface Ethernet1/47
+
+interface Ethernet1/48
+
+interface Ethernet1/49
+
+interface Ethernet1/50
+
+interface Ethernet1/51
+
+interface Ethernet1/52
+
+interface Ethernet1/53
+
+interface Ethernet1/54
+
+interface Ethernet1/55
+
+interface Ethernet1/56
+
+interface Ethernet1/57
+
+interface Ethernet1/58
+
+interface Ethernet1/59
+
+interface Ethernet1/60
+
+interface Ethernet1/61
+
+interface Ethernet1/62
+
+interface Ethernet1/63
+
+interface Ethernet1/64
+
+interface mgmt0
+  vrf member management
+
+interface loopback1
+  description # Router ID
+  ip address 10.101.221.1/32
+  ip router ospf UNDERLAY area 0.0.0.0
+
+interface loopback2
+  description # VTEP-ID
+  ip address 10.101.222.1/32
+icam monitor scale
+
+cli alias name wr copy run start
+cli alias name c conf term
+cli alias name sir show ip route
+line console
+  exec-timeout 0
+  terminal length 48
+  terminal width  186
+line vty
+boot nxos bootflash:/nxos.9.3.8.bin sup-1
+router ospf UNDERLAY
+  router-id 10.101.221.1
+  maximum-paths 2
+  passive-interface default
+
+
+
+Spine-R2#
+```
+
 <summary>
 Spine-2
 <summary>
 </details>
 
 <details>
+
+```
+BRF-Leaf-R1# sh run
+
+!Command: show running-config
+!No configuration change since last restart
+!Time: Tue Nov 26 23:51:46 2024
+
+version 9.3(8) Bios:version  
+hostname BRF-Leaf-R1
+vdc BRF-Leaf-R1 id 1
+  limit-resource vlan minimum 16 maximum 4094
+  limit-resource vrf minimum 2 maximum 4096
+  limit-resource port-channel minimum 0 maximum 511
+  limit-resource u4route-mem minimum 248 maximum 248
+  limit-resource u6route-mem minimum 96 maximum 96
+  limit-resource m4route-mem minimum 58 maximum 58
+  limit-resource m6route-mem minimum 8 maximum 8
+
+feature ospf
+clock timezone PRM 5 0
+
+no password strength-check
+username admin password 5 $5$MIDGHI$2nFpqu8C1skfYJz.nfv1.xMRxcwGOkEBjf3WOrg50kB  role network-admin
+no ip domain-lookup
+copp profile strict
+snmp-server user admin auth md5 3763E49E7388DDE1EE6ED8E11043B7613B48 priv 3239A4DB7EDE89AAAA62D4BD1817E56D6717 localizedV2key engineID 128:0:0:9:3:12:205:0:0:27:1
+rmon event 1 log trap public description FATAL(1) owner PMON@FATAL
+rmon event 2 log trap public description CRITICAL(2) owner PMON@CRITICAL
+rmon event 3 log trap public description ERROR(3) owner PMON@ERROR
+rmon event 4 log trap public description WARNING(4) owner PMON@WARNING
+rmon event 5 log trap public description INFORMATION(5) owner PMON@INFO
+
+vlan 1
+
+vrf context management
+
+interface Ethernet1/1
+  description to_spine-1
+  no switchport
+  ip address 10.101.14.2/30
+  ip ospf network point-to-point
+  no ip ospf passive-interface
+  ip router ospf UNDERLAY area 0.0.0.0
+  no shutdown
+
+interface Ethernet1/2
+  description to_spine-2
+  no switchport
+  ip address 10.101.24.2/30
+  ip ospf network point-to-point
+  no ip ospf passive-interface
+  ip router ospf UNDERLAY area 0.0.0.0
+  no shutdown
+
+interface Ethernet1/3
+  shutdown
+
+interface Ethernet1/4
+  shutdown
+
+interface Ethernet1/5
+  description to_switch
+  no switchport
+  ip address 192.168.55.1/30
+  no shutdown
+
+interface Ethernet1/6
+  shutdown
+
+interface Ethernet1/7
+  shutdown
+
+interface Ethernet1/8
+  shutdown
+
+interface Ethernet1/9
+  description to_wan
+  no switchport
+  speed 1000
+  duplex full
+  ip address 172.24.1.1/30
+  ip ospf network point-to-point
+  no ip ospf passive-interface
+  ip router ospf UNDERLAY area 0.0.0.0
+  no shutdown
+
+interface Ethernet1/10
+
+interface Ethernet1/11
+
+interface Ethernet1/12
+
+interface Ethernet1/13
+
+interface Ethernet1/14
+
+interface Ethernet1/15
+
+interface Ethernet1/16
+
+interface Ethernet1/17
+
+interface Ethernet1/18
+
+interface Ethernet1/19
+
+interface Ethernet1/20
+
+interface Ethernet1/21
+
+interface Ethernet1/22
+
+interface Ethernet1/23
+
+interface Ethernet1/24
+
+interface Ethernet1/25
+
+interface Ethernet1/26
+
+interface Ethernet1/27
+
+interface Ethernet1/28
+
+interface Ethernet1/29
+
+interface Ethernet1/30
+
+interface Ethernet1/31
+
+interface Ethernet1/32
+
+interface Ethernet1/33
+
+interface Ethernet1/34
+
+interface Ethernet1/35
+
+interface Ethernet1/36
+
+interface Ethernet1/37
+
+interface Ethernet1/38
+
+interface Ethernet1/39
+
+interface Ethernet1/40
+
+interface Ethernet1/41
+
+interface Ethernet1/42
+
+interface Ethernet1/43
+
+interface Ethernet1/44
+
+interface Ethernet1/45
+
+interface Ethernet1/46
+
+interface Ethernet1/47
+
+interface Ethernet1/48
+
+interface Ethernet1/49
+
+interface Ethernet1/50
+
+interface Ethernet1/51
+
+interface Ethernet1/52
+
+interface Ethernet1/53
+
+interface Ethernet1/54
+
+interface Ethernet1/55
+
+interface Ethernet1/56
+
+interface Ethernet1/57
+
+interface Ethernet1/58
+
+interface Ethernet1/59
+
+interface Ethernet1/60
+
+interface Ethernet1/61
+
+interface Ethernet1/62
+
+interface Ethernet1/63
+
+interface Ethernet1/64
+
+interface mgmt0
+  vrf member management
+
+interface loopback1
+  description # Router ID
+  ip address 10.101.11.1/32
+  ip router ospf UNDERLAY area 0.0.0.0
+
+interface loopback2
+  description # VTEP-ID
+  ip address 10.101.12.1/32
+icam monitor scale
+
+cli alias name wr copy run start
+cli alias name c conf term
+cli alias name sir show ip route
+line console
+  exec-timeout 0
+  terminal length 48
+  terminal width  186
+line vty
+boot nxos bootflash:/nxos.9.3.8.bin sup-1
+router ospf UNDERLAY
+  router-id 10.101.11.1
+  passive-interface default
+
+
+
+BRF-Leaf-R1#
+```
+
 <summary>
 BRD-Leaf-1
 <summary>
 </details>
 
 <details>
+
+```
+BRD-Leaf-R2# sh run
+
+!Command: show running-config
+!No configuration change since last restart
+!Time: Tue Nov 26 23:53:05 2024
+
+version 9.3(8) Bios:version  
+hostname BRD-Leaf-R2
+vdc BRD-Leaf-R2 id 1
+  limit-resource vlan minimum 16 maximum 4094
+  limit-resource vrf minimum 2 maximum 4096
+  limit-resource port-channel minimum 0 maximum 511
+  limit-resource u4route-mem minimum 248 maximum 248
+  limit-resource u6route-mem minimum 96 maximum 96
+  limit-resource m4route-mem minimum 58 maximum 58
+  limit-resource m6route-mem minimum 8 maximum 8
+
+feature ospf
+clock timezone PRM 5 0
+
+no password strength-check
+username admin password 5 $5$ACNBEF$17/UC5AByWpXNbBSvnuvJloYBoV9atZRzW.oDYLwnr5  role network-admin
+no ip domain-lookup
+copp profile strict
+snmp-server user admin auth md5 3752D36F5DECF4F5D19CE99D2745ADFDA765 priv 3756B50865C39086B7F9D2F641D5132E760C localizedV2key engineID 128:0:0:9:3:12:33:0:0:27:1
+rmon event 1 log trap public description FATAL(1) owner PMON@FATAL
+rmon event 2 log trap public description CRITICAL(2) owner PMON@CRITICAL
+rmon event 3 log trap public description ERROR(3) owner PMON@ERROR
+rmon event 4 log trap public description WARNING(4) owner PMON@WARNING
+rmon event 5 log trap public description INFORMATION(5) owner PMON@INFO
+
+vlan 1
+
+vrf context management
+
+interface Ethernet1/1
+  description to_spine-1
+  no switchport
+  ip address 10.101.14.6/30
+  ip ospf network point-to-point
+  no ip ospf passive-interface
+  ip router ospf UNDERLAY area 0.0.0.0
+  no shutdown
+
+interface Ethernet1/2
+  description to_spine-2
+  no switchport
+  ip address 10.101.24.6/30
+  ip ospf network point-to-point
+  no ip ospf passive-interface
+  ip router ospf UNDERLAY area 0.0.0.0
+  no shutdown
+
+interface Ethernet1/3
+  shutdown
+
+interface Ethernet1/4
+  shutdown
+
+interface Ethernet1/5
+  shutdown
+
+interface Ethernet1/6
+  shutdown
+
+interface Ethernet1/7
+  shutdown
+
+interface Ethernet1/8
+  shutdown
+
+interface Ethernet1/9
+  description to_wan
+  no switchport
+  speed 1000
+  duplex full
+  ip address 172.24.2.1/30
+  ip ospf network point-to-point
+  no ip ospf passive-interface
+  ip router ospf UNDERLAY area 0.0.0.0
+  no shutdown
+
+interface Ethernet1/10
+
+interface Ethernet1/11
+
+interface Ethernet1/12
+
+interface Ethernet1/13
+
+interface Ethernet1/14
+
+interface Ethernet1/15
+
+interface Ethernet1/16
+
+interface Ethernet1/17
+
+interface Ethernet1/18
+
+interface Ethernet1/19
+
+interface Ethernet1/20
+
+interface Ethernet1/21
+
+interface Ethernet1/22
+
+interface Ethernet1/23
+
+interface Ethernet1/24
+
+interface Ethernet1/25
+
+interface Ethernet1/26
+
+interface Ethernet1/27
+
+interface Ethernet1/28
+
+interface Ethernet1/29
+
+interface Ethernet1/30
+
+interface Ethernet1/31
+
+interface Ethernet1/32
+
+interface Ethernet1/33
+
+interface Ethernet1/34
+
+interface Ethernet1/35
+
+interface Ethernet1/36
+
+interface Ethernet1/37
+
+interface Ethernet1/38
+
+interface Ethernet1/39
+
+interface Ethernet1/40
+
+interface Ethernet1/41
+
+interface Ethernet1/42
+
+interface Ethernet1/43
+
+interface Ethernet1/44
+
+interface Ethernet1/45
+
+interface Ethernet1/46
+
+interface Ethernet1/47
+
+interface Ethernet1/48
+
+interface Ethernet1/49
+
+interface Ethernet1/50
+
+interface Ethernet1/51
+
+interface Ethernet1/52
+
+interface Ethernet1/53
+
+interface Ethernet1/54
+
+interface Ethernet1/55
+
+interface Ethernet1/56
+
+interface Ethernet1/57
+
+interface Ethernet1/58
+
+interface Ethernet1/59
+
+interface Ethernet1/60
+
+interface Ethernet1/61
+
+interface Ethernet1/62
+
+interface Ethernet1/63
+
+interface Ethernet1/64
+
+interface mgmt0
+  vrf member management
+
+interface loopback1
+  description # Router ID
+  ip address 10.101.21.1/32
+  ip router ospf UNDERLAY area 0.0.0.0
+
+interface loopback2
+  description # VTEP-ID
+  ip address 10.101.22.1/32
+icam monitor scale
+
+cli alias name wr copy run start
+cli alias name c conf term
+cli alias name sir show ip route
+line console
+  exec-timeout 0
+  terminal length 48
+  terminal width  186
+line vty
+boot nxos bootflash:/nxos.9.3.8.bin sup-1
+router ospf UNDERLAY
+  router-id 10.101.21.1
+  passive-interface default
+
+
+
+BRD-Leaf-R2#
+```
+
 <summary>
 BRD-Leaf-2
 <summary>
 </details>
 
+
+<details>
+
+```
+ToWAN#sh run br
+Building configuration...
+
+Current configuration : 2016 bytes
+!
+version 17.12
+service timestamps debug datetime msec
+service timestamps log datetime msec
+!
+hostname ToWAN
+!
+boot-start-marker
+boot-end-marker
+!
+!
+logging console warnings
+no aaa new-model
+!
+!
+!
+clock timezone PRM 5 0
+no ip icmp rate-limit unreachable
+!
+!
+!
+!         
+!
+!
+!
+!
+!
+!
+no ip domain lookup
+ip cef
+login on-success log
+no ipv6 cef
+!
+!
+!
+!
+!
+!
+!
+!
+multilink bundle-name authenticated
+!
+!
+crypto pki trustpoint TP-self-signed-2043905
+ enrollment selfsigned
+ subject-name cn=IOS-Self-Signed-Certificate-2043905
+ revocation-check none
+ rsakeypair TP-self-signed-2043905
+ hash sha256
+!
+!
+crypto pki certificate chain TP-self-signed-2043905
+ certificate self-signed 01
+!
+!
+memory free low-watermark processor 55011
+!
+!
+spanning-tree mode rapid-pvst
+!
+!
+!
+!
+!
+!
+!
+! 
+!         
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Loopback1
+ description Router-ID
+ ip address 172.24.200.1 255.255.255.255
+ ip ospf 10 area 0
+!
+interface Ethernet0/0
+ ip address 172.24.1.2 255.255.255.252
+ ip ospf network point-to-point
+ ip ospf 10 area 0
+!
+interface Ethernet0/1
+ ip address 172.24.2.2 255.255.255.252
+ ip ospf network point-to-point
+ ip ospf 10 area 0
+!
+interface Ethernet0/2
+ no ip address
+ shutdown
+!
+interface Ethernet0/3
+ no ip address
+ shutdown
+!
+interface Ethernet1/0
+ no ip address
+ shutdown
+!
+interface Ethernet1/1
+ ip address 192.168.100.2 255.255.255.252
+ no ip redirects
+ shutdown
+!         
+interface Ethernet1/2
+ no ip address
+ shutdown
+!
+interface Ethernet1/3
+ no ip address
+ shutdown
+!
+router ospf 10
+ router-id 172.24.200.1
+ passive-interface default
+ no passive-interface Ethernet0/0
+ no passive-interface Ethernet0/1
+ default-information originate
+!
+ip forward-protocol nd
+!
+ip tcp synwait-time 5
+!
+ip http server
+ip http secure-server
+ip route 0.0.0.0 0.0.0.0 Null0
+ip ssh bulk-mode 131072
+!
+!
+!
+!
+!
+control-plane
+!
+!
+alias exec c conf t
+!
+line con 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+line aux 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+line vty 0 4
+ login
+ transport input ssh
+!
+!         
+!
+!
+end
+
+ToWAN#
+```
+
+<summary>
+WAN Router
+<summary>
+</details>
 
