@@ -498,6 +498,8 @@ Leaf-R1#
 #### Настройки маршрутизаторов ####
 
 <details>
+
+```text
 Leaf-R1# sh run
 
 !Command: show running-config
@@ -729,6 +731,8 @@ router ospf UNDERLAY
 
 
 Leaf-R1#
+```
+
 <summary>
 Leaf-1
 <summary>
