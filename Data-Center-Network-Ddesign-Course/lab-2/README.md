@@ -498,6 +498,237 @@ Leaf-R1#
 #### Настройки маршрутизаторов ####
 
 <details>
+Leaf-R1# sh run
+
+!Command: show running-config
+!Running configuration last done at: Tue Nov 26 20:17:23 2024
+!Time: Tue Nov 26 23:33:51 2024
+
+version 9.3(8) Bios:version  
+hostname Leaf-R1
+vdc Leaf-R1 id 1
+  limit-resource vlan minimum 16 maximum 4094
+  limit-resource vrf minimum 2 maximum 4096
+  limit-resource port-channel minimum 0 maximum 511
+  limit-resource u4route-mem minimum 248 maximum 248
+  limit-resource u6route-mem minimum 96 maximum 96
+  limit-resource m4route-mem minimum 58 maximum 58
+  limit-resource m6route-mem minimum 8 maximum 8
+
+feature ospf
+clock timezone PRM 5 0
+
+no password strength-check
+username admin password 5 $5$HIMIJM$qT5AXQEfCx.kdpdUF8dRHjlsjyL3TdgR9BhmK9uAYx7  role network-admin
+no ip domain-lookup
+copp profile strict
+snmp-server user admin auth md5 0153448F0CDEAA7AC3D8A6E1207E29746751 priv 204F64F031BBA129B39DABB42F633F6C6872 localizedV2key engineID 128:0:0:9:3:12:159:0:0:27:1
+rmon event 1 log trap public description FATAL(1) owner PMON@FATAL
+rmon event 2 log trap public description CRITICAL(2) owner PMON@CRITICAL
+rmon event 3 log trap public description ERROR(3) owner PMON@ERROR
+rmon event 4 log trap public description WARNING(4) owner PMON@WARNING
+rmon event 5 log trap public description INFORMATION(5) owner PMON@INFO
+
+vlan 1
+
+vrf context VRF_VPC-KEEPALIVE
+  address-family ipv4 unicast
+vrf context management
+hardware access-list tcam region racl 256
+hardware access-list tcam region vpc-convergence 256
+hardware access-list tcam region arp-ether 256
+
+
+interface Ethernet1/1
+  description to_spine_1
+  no switchport
+  ip address 10.101.214.2/30
+  ip ospf network point-to-point
+  no ip ospf passive-interface
+  ip router ospf UNDERLAY area 0.0.0.0
+  no shutdown
+
+interface Ethernet1/2
+  description to_spine_2
+  no switchport
+  ip address 10.101.224.2/30
+  ip ospf network point-to-point
+  no ip ospf passive-interface
+  ip router ospf UNDERLAY area 0.0.0.0
+  no shutdown
+
+interface Ethernet1/3
+  shutdown
+
+interface Ethernet1/4
+  shutdown
+
+interface Ethernet1/5
+  shutdown
+
+interface Ethernet1/6
+  shutdown
+
+interface Ethernet1/7
+  shutdown
+
+interface Ethernet1/8
+  shutdown
+
+interface Ethernet1/9
+  shutdown
+
+interface Ethernet1/10
+  shutdown
+
+interface Ethernet1/11
+  shutdown
+
+interface Ethernet1/12
+  shutdown
+
+interface Ethernet1/13
+  shutdown
+
+interface Ethernet1/14
+  shutdown
+
+interface Ethernet1/15
+  description vPC K/A to_leaf-2
+  no switchport
+  vrf member VRF_VPC-KEEPALIVE
+  ip address 10.101.113.1/30
+  no shutdown
+
+interface Ethernet1/16
+
+interface Ethernet1/17
+
+interface Ethernet1/18
+
+interface Ethernet1/19
+
+interface Ethernet1/20
+
+interface Ethernet1/21
+
+interface Ethernet1/22
+
+interface Ethernet1/23
+
+interface Ethernet1/24
+
+interface Ethernet1/25
+
+interface Ethernet1/26
+
+interface Ethernet1/27
+
+interface Ethernet1/28
+
+interface Ethernet1/29
+
+interface Ethernet1/30
+
+interface Ethernet1/31
+
+interface Ethernet1/32
+
+interface Ethernet1/33
+
+interface Ethernet1/34
+
+interface Ethernet1/35
+
+interface Ethernet1/36
+
+interface Ethernet1/37
+
+interface Ethernet1/38
+
+interface Ethernet1/39
+
+interface Ethernet1/40
+
+interface Ethernet1/41
+
+interface Ethernet1/42
+
+interface Ethernet1/43
+
+interface Ethernet1/44
+
+interface Ethernet1/45
+
+interface Ethernet1/46
+
+interface Ethernet1/47
+
+interface Ethernet1/48
+
+interface Ethernet1/49
+
+interface Ethernet1/50
+
+interface Ethernet1/51
+
+interface Ethernet1/52
+
+interface Ethernet1/53
+
+interface Ethernet1/54
+
+interface Ethernet1/55
+
+interface Ethernet1/56
+
+interface Ethernet1/57
+
+interface Ethernet1/58
+
+interface Ethernet1/59
+
+interface Ethernet1/60
+
+interface Ethernet1/61
+
+interface Ethernet1/62
+
+interface Ethernet1/63
+
+interface Ethernet1/64
+
+interface mgmt0
+  vrf member management
+
+interface loopback1
+  description # Router ID
+  ip address 10.101.111.1/32
+  ip router ospf UNDERLAY area 0.0.0.0
+
+interface loopback2
+  description # VTEP-ID
+  ip address 10.101.112.1/32
+icam monitor scale
+
+cli alias name wr copy run start
+cli alias name c conf term
+cli alias name sir show ip route
+cli alias name cef show forwarding ipv4 
+cli alias name adj show ip adj
+line console
+  exec-timeout 0
+  terminal length 48
+  terminal width  186
+line vty
+boot nxos bootflash:/nxos.9.3.8.bin sup-1
+router ospf UNDERLAY
+  router-id 10.101.111.1
+  passive-interface default
+
+
+
+Leaf-R1#
 <summary>
 Leaf-1
 <summary>
