@@ -496,7 +496,7 @@ Leaf-R1#
 
 #### Настройки маршрутизаторов ####
 
-<details>
+<details><summary>Leaf-1</summary>
 
 ```text
 Leaf-R1# sh run
@@ -732,12 +732,9 @@ router ospf UNDERLAY
 Leaf-R1#
 ```
 
-<summary>
-Leaf-1
-<summary>
 </details>
 
-<details>
+<details><summary>Leaf-2</summary>
 
 ```
 Leaf-R2# sh run
@@ -972,12 +969,9 @@ router ospf UNDERLAY
 Leaf-R2#
 ```
 
-<summary>
-Leaf-2
-<summary>
 </details>
 
-<details>
+<details><summary>Leaf-3</summary>
 
 ```
 Leaf-R3# sh run
@@ -1208,12 +1202,9 @@ router ospf UNDERLAY
 Leaf-R3#
 ```
 
-<summary>
-Leaf-3
-<summary>
 </details>
 
-<details>
+<details><summary>Leaf-4</summary>
 
 ```
 Leaf-R4# sh run
@@ -1444,12 +1435,9 @@ router ospf UNDERLAY
 Leaf-R4#
 ```
 
-<summary>
-Leaf-4
-<summary>
 </details>
 
-<details>
+<details><summary>Spine-1</summary>
 
 ```
 Spine-R1# sh run
@@ -1697,12 +1685,9 @@ router ospf UNDERLAY
 Spine-R1#
 ```
 
-<summary>
-Spine-1
-<summary>
 </details>
 
-<details>
+<details><summary>Spine-2</summary>
 
 ```
 Spine-R2# sh run
@@ -1944,12 +1929,9 @@ router ospf UNDERLAY
 Spine-R2#
 ```
 
-<summary>
-Spine-2
-<summary>
 </details>
 
-<details>
+<details><summary>BRD-Leaf-1</summary>
 
 ```
 BRF-Leaf-R1# sh run
@@ -2178,12 +2160,9 @@ router ospf UNDERLAY
 BRF-Leaf-R1#
 ```
 
-<summary>
-BRD-Leaf-1
-<summary>
 </details>
 
-<details>
+<details><summary>BRD-Leaf-2</summary>
 
 ```
 BRD-Leaf-R2# sh run
@@ -2409,13 +2388,10 @@ router ospf UNDERLAY
 BRD-Leaf-R2#
 ```
 
-<summary>
-BRD-Leaf-2
-<summary>
 </details>
 
 
-<details>
+<details><summary>WAN Router</summary>
 
 ```
 ToWAN#sh run br
@@ -2589,8 +2565,5 @@ end
 ToWAN#
 ```
 
-<summary>
-WAN Router
-<summary>
 </details>
 
