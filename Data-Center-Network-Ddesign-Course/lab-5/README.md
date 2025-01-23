@@ -342,9 +342,9 @@ Neighbor        V    AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
 Spine-R2#
 ```
 
-#### Дальнейшие настройки будем проводить только на лифах - настройки идентичные
+#### Дальнейшие настройки будем проводить только на лифах - и настройки там будут настройки идентичные
 
-Настроим NVE интерфейс, но для начала включим на кажом лифе нужные фичи:
+Настроим NVE интерфейс, но для начала включим на каждом лифе нужные фичи:
 
 ```text
 feature nv overlay
@@ -824,7 +824,8 @@ EndPont-2#
 
 <details>
 <summary>Leaf-1</summary>
-```
+
+```text
 Leaf-R1#sh run
 !Command: show running-config
 !Running configuration last done at: Fri Jan 24 02:47:48 2025
