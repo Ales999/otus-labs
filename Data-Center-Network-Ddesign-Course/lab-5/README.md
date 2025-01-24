@@ -527,7 +527,7 @@ Leaf-R1(config-vpc-domain)# 2025 Jan 24 00:02:08 Leaf-R1 %$ VDC-1 %$ %STP-2-VPC_
 
 Leaf-R1(config-vpc-domain)# exit
 Leaf-R1(config)#
-Leaf-R2(config)# spanning-tree vlan 1-3967 priority 4096
+Leaf-R1(config)# spanning-tree vlan 1-3967 priority 4096
 ```
 
 Примечание:
@@ -2119,6 +2119,7 @@ router isis UNDERLAY
 
 Leaf-R4# 
 ```
+
 </details>
 
 <details>
@@ -3189,8 +3190,6 @@ BRD-Leaf-R2#
 ```
 
 </details>
-
-
 
 <details>
 <summary>ToWan</summary>
