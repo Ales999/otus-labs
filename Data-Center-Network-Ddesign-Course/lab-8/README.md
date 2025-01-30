@@ -1,6 +1,6 @@
-# Lab-7
+# Lab-8
 
-## VXLAN. Multihoming
+## VxLAN. Routing
 
 (Механошин Алексей и Подлеснов Александр)
 
