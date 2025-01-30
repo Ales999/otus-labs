@@ -862,7 +862,7 @@ HOST-R4:/#
 
 Настроим на всех обычных лифах редистрибуцию connected (direct) префиксов по каждому VRF в BGP, и префиксы Host-Mobility (HMM),
  но для этого нам надо создать сначала пустой ```route-map`` поскольку BGP на нексусах требует его наличия.
- 
+
 ```text
 Leaf-R4# conf term
 Enter configuration commands, one per line. End with CNTL/Z.
@@ -1222,7 +1222,9 @@ HOST-R31:/#
 
 Всё ожидаемо так-же ходит через роутер.
 
-Далее настроим на Leaf-4 vrf route-leaking (необходимо настроить на всех лифах ):
+Далее настроим на Leaf-4 vrf route-leaking (необходимо настроить на всех лифах по идее):
+
+Примечание: Хорошая стетейка про общий VRF-Leaking [тут](https://www.cisco.com/c/en/us/support/docs/ios-nx-os-software/nx-os-software/213908-configure-vrf-route-leak-on-nexus.html#toc-hId-2028677848)
 
 ```text
 Leaf-R4# c
