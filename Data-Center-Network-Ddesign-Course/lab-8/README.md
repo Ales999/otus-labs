@@ -898,6 +898,8 @@ Leaf-R4#
 
 ![VxLAN Arhitecture](./images/VxLAN_Architecture.png)
 
+![HMM](./images/arp-to-l2vpn.png)
+
 </details>
 
 Теперь просто, через префикс-лист, запретим передавать хосто-роуты в сторону роутера, в обоих VRF-ах.
