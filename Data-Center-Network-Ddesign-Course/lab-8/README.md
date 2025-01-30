@@ -1317,6 +1317,367 @@ HOST-R31:/#
 ```text
 Leaf-R1# sh run
 
+
+!Command: show running-config
+!Running configuration last done at: Thu Jan 30 13:35:36 2025
+!Time: Thu Jan 30 16:21:07 2025
+
+version 9.3(8) Bios:version  
+hostname Leaf-R1
+vdc Leaf-R1 id 1
+  limit-resource vlan minimum 16 maximum 4094
+  limit-resource vrf minimum 2 maximum 4096
+  limit-resource port-channel minimum 0 maximum 511
+  limit-resource u4route-mem minimum 248 maximum 248
+  limit-resource u6route-mem minimum 96 maximum 96
+  limit-resource m4route-mem minimum 58 maximum 58
+  limit-resource m6route-mem minimum 8 maximum 8
+
+cfs eth distribute
+nv overlay evpn
+feature bgp
+feature isis
+feature fabric forwarding
+feature interface-vlan
+feature vn-segment-vlan-based
+feature lacp
+feature vpc
+feature bfd
+clock timezone PRM 5 0
+feature nv overlay
+
+no password strength-check
+username admin password 5 $5$HIMIJM$qT5AXQEfCx.kdpdUF8dRHjlsjyL3TdgR9BhmK9uAYx7  role network-admin
+no ip domain-lookup
+copp profile strict
+snmp-server user admin auth md5 0153448F0CDEAA7AC3D8A6E1207E29746751 priv 204F64F031BBA129B39DABB42F633F6C6872 localizedV2key engineID 128:0:0:9:3:12:159:0:0:27:1
+rmon event 1 log trap public description FATAL(1) owner PMON@FATAL
+rmon event 2 log trap public description CRITICAL(2) owner PMON@CRITICAL
+rmon event 3 log trap public description ERROR(3) owner PMON@ERROR
+rmon event 4 log trap public description WARNING(4) owner PMON@WARNING
+rmon event 5 log trap public description INFORMATION(5) owner PMON@INFO
+
+fabric forwarding anycast-gateway-mac 0001.0001.0001
+vlan 1,10,20,1010
+vlan 10
+  name EndPoint-1
+  vn-segment 10000010
+vlan 20
+  vn-segment 10000020
+vlan 1010
+  vn-segment 51010
+
+spanning-tree vlan 1-3967 priority 4096
+key chain ISIS
+  key 1
+    key-string 7 070c285f4d064b0916100a
+vrf context LABA
+  vni 51010
+  rd auto
+  address-family ipv4 unicast
+    route-target both auto
+    route-target both auto evpn
+vrf context VRF_VPC-KEEPALIVE
+  address-family ipv4 unicast
+vrf context management
+hardware access-list tcam region racl 256
+hardware access-list tcam region e-racl 0
+hardware access-list tcam region arp-ether 256
+vpc domain 1
+  peer-switch
+  role priority 1000
+  peer-keepalive destination 10.101.113.2 source 10.101.113.1 vrf VRF_VPC-KEEPALIVE
+  auto-recovery
+  ip arp synchronize
+
+
+interface Vlan1
+
+interface Vlan10
+  no shutdown
+  vrf member LABA
+  ip address 172.24.10.1/24
+  fabric forwarding mode anycast-gateway
+
+interface Vlan20
+  no shutdown
+  vrf member LABA
+  ip address 172.24.20.1/24
+  fabric forwarding mode anycast-gateway
+
+interface Vlan1010
+  no shutdown
+  vrf member LABA
+  ip forward
+
+interface port-channel15
+  description *** SW-1 ***
+  switchport mode trunk
+  switchport access vlan 10
+  switchport trunk allowed vlan 10,20
+  speed 1000
+  vpc 15
+
+interface port-channel100
+  description *** VPC PEER LINKS ***
+  switchport mode trunk
+  spanning-tree port type network
+  vpc peer-link
+
+interface nve1
+  no shutdown
+  host-reachability protocol bgp
+  source-interface loopback2
+  member vni 51010 associate-vrf
+  member vni 10000010
+    ingress-replication protocol bgp
+  member vni 10000020
+    ingress-replication protocol bgp
+
+interface Ethernet1/1
+  description to_spine_1
+  no switchport
+  bfd interval 999 min_rx 999 multiplier 3
+  bfd authentication Keyed-SHA1 key-id 1 hex-key 636973636F326C616261
+  no ip redirects
+  ip address 10.101.214.2/30
+  no ipv6 redirects
+  isis metric 100 level-1
+  isis metric 100 level-2
+  isis network point-to-point
+  ip router isis UNDERLAY
+  no isis passive-interface level-1-2
+  isis bfd disable
+  no shutdown
+
+interface Ethernet1/2
+  description to_spine_2
+  no switchport
+  no ip redirects
+  ip address 10.101.224.2/30
+  no ipv6 redirects
+  isis metric 100 level-1
+  isis metric 100 level-2
+  isis network point-to-point
+  ip router isis UNDERLAY
+  no isis passive-interface level-1-2
+  no shutdown
+
+interface Ethernet1/3
+  shutdown
+
+interface Ethernet1/4
+  shutdown
+
+interface Ethernet1/5
+  shutdown
+
+interface Ethernet1/6
+  shutdown
+
+interface Ethernet1/7
+  shutdown
+
+interface Ethernet1/8
+  description *** SW-1 ***
+  switchport mode trunk
+  switchport access vlan 10
+  switchport trunk allowed vlan 10,20
+  speed 1000
+  channel-group 15
+
+interface Ethernet1/9
+  shutdown
+
+interface Ethernet1/10
+  shutdown
+
+interface Ethernet1/11
+  shutdown
+
+interface Ethernet1/12
+  shutdown
+
+interface Ethernet1/13
+  description *** VPC PEER LINKS ***
+  switchport mode trunk
+  channel-group 100 mode active
+
+interface Ethernet1/14
+  description *** VPC PEER LINKS ***
+  switchport mode trunk
+  channel-group 100 mode active
+
+interface Ethernet1/15
+  description vPC K/A to_leaf-2
+  no switchport
+  vrf member VRF_VPC-KEEPALIVE
+  ip address 10.101.113.1/30
+  no shutdown
+
+interface Ethernet1/16
+
+interface Ethernet1/17
+
+interface Ethernet1/18
+
+interface Ethernet1/19
+
+interface Ethernet1/20
+
+interface Ethernet1/21
+
+interface Ethernet1/22
+
+interface Ethernet1/23
+
+interface Ethernet1/24
+
+interface Ethernet1/25
+
+interface Ethernet1/26
+
+interface Ethernet1/27
+
+interface Ethernet1/28
+
+interface Ethernet1/29
+
+interface Ethernet1/30
+
+interface Ethernet1/31
+
+interface Ethernet1/32
+
+interface Ethernet1/33
+
+interface Ethernet1/34
+
+interface Ethernet1/35
+
+interface Ethernet1/36
+
+interface Ethernet1/37
+
+interface Ethernet1/38
+
+interface Ethernet1/39
+
+interface Ethernet1/40
+
+interface Ethernet1/41
+
+interface Ethernet1/42
+
+interface Ethernet1/43
+
+interface Ethernet1/44
+
+interface Ethernet1/45
+
+interface Ethernet1/46
+
+interface Ethernet1/47
+
+interface Ethernet1/48
+
+interface Ethernet1/49
+
+interface Ethernet1/50
+
+interface Ethernet1/51
+
+interface Ethernet1/52
+
+interface Ethernet1/53
+
+interface Ethernet1/54
+
+interface Ethernet1/55
+
+interface Ethernet1/56
+
+interface Ethernet1/57
+
+interface Ethernet1/58
+
+interface Ethernet1/59
+
+interface Ethernet1/60
+
+interface Ethernet1/61
+
+interface Ethernet1/62
+
+interface Ethernet1/63
+
+interface Ethernet1/64
+
+interface mgmt0
+  vrf member management
+
+interface loopback1
+  description # Router ID
+  ip address 10.101.111.1/32
+  ip router isis UNDERLAY
+
+interface loopback2
+  description # VTEP-ID
+  ip address 10.101.112.1/32
+  ip address 10.101.112.2/32 secondary
+  ip router isis UNDERLAY
+icam monitor scale
+
+cli alias name wr copy run start
+cli alias name c conf term
+cli alias name sir show ip route
+cli alias name cef show forwarding ipv4 
+cli alias name adj show ip adj
+cli alias name srr sh run | sec router
+cli alias name hi sh cli history unformatted 
+line console
+  exec-timeout 0
+  terminal length 48
+  terminal width  186
+line vty
+boot nxos bootflash:/nxos.9.3.8.bin sup-1
+router isis UNDERLAY
+  net 49.0001.0101.0111.1001.00
+  is-type level-1
+  log-adjacency-changes
+  authentication-type md5 level-1
+  authentication-type md5 level-2
+  authentication key-chain ISIS level-1
+  authentication key-chain ISIS level-2
+  address-family ipv4 unicast
+    maximum-paths 2
+    router-id loopback1
+  passive-interface default level-1-2
+router bgp 65010
+  router-id 10.101.112.1
+  template peer SPINES
+    remote-as 65010
+    update-source loopback2
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+  neighbor 10.101.212.1
+    inherit peer SPINES
+    description Spine-1
+  neighbor 10.101.222.1
+    inherit peer SPINES
+    description Spine-2
+  vrf DEMO
+    address-family ipv4 unicast
+      redistribute direct route-map RM_PERMIT_IPv4
+      redistribute hmm route-map RM_PERMIT_IPv4
+  vrf LABA
+    address-family ipv4 unicast
+      redistribute direct route-map RM_PERMIT_IPv4
+      redistribute hmm route-map RM_PERMIT_IPv4
+
+
+
 Leaf-R1#
 ```
 
@@ -1327,6 +1688,350 @@ Leaf-R1#
 
 ```text
 Leaf-R2# sh run
+
+!Command: show running-config
+!Running configuration last done at: Thu Jan 30 13:35:32 2025
+!Time: Thu Jan 30 16:21:45 2025
+
+version 9.3(8) Bios:version  
+hostname Leaf-R2
+vdc Leaf-R2 id 1
+  limit-resource vlan minimum 16 maximum 4094
+  limit-resource vrf minimum 2 maximum 4096
+  limit-resource port-channel minimum 0 maximum 511
+  limit-resource u4route-mem minimum 248 maximum 248
+  limit-resource u6route-mem minimum 96 maximum 96
+  limit-resource m4route-mem minimum 58 maximum 58
+  limit-resource m6route-mem minimum 8 maximum 8
+
+cfs eth distribute
+nv overlay evpn
+feature bgp
+feature isis
+feature fabric forwarding
+feature interface-vlan
+feature vn-segment-vlan-based
+feature lacp
+feature vpc
+clock timezone PRM 5 0
+feature nv overlay
+
+no password strength-check
+username admin password 5 $5$GILIBL$I50uIEZ2.Id5WPuEW2/kF2LnprBS1fD4bK7PLYdXCs4  role network-admin
+no ip domain-lookup
+copp profile strict
+snmp-server user admin auth md5 042F0B626D2474725C91211D7B2226CDBDEA priv 040F77425611450B4490383F363A768CEBA9 localizedV2key engineID 128:0:0:9:3:12:22:0:0:27:1
+rmon event 1 log trap public description FATAL(1) owner PMON@FATAL
+rmon event 2 log trap public description CRITICAL(2) owner PMON@CRITICAL
+rmon event 3 log trap public description ERROR(3) owner PMON@ERROR
+rmon event 4 log trap public description WARNING(4) owner PMON@WARNING
+rmon event 5 log trap public description INFORMATION(5) owner PMON@INFO
+
+fabric forwarding anycast-gateway-mac 0001.0001.0001
+vlan 1,10,20,1010
+vlan 10
+  name EndPoint-1
+  vn-segment 10000010
+vlan 20
+  vn-segment 10000020
+vlan 1010
+  vn-segment 51010
+
+spanning-tree vlan 1-3967 priority 4096
+key chain ISIS
+  key 1
+    key-string 7 070c285f4d064b0916100a
+vrf context LABA
+  vni 51010
+  rd auto
+  address-family ipv4 unicast
+    route-target both auto
+    route-target both auto evpn
+vrf context VRF_VPC-KEEPALIVE
+  address-family ipv4 unicast
+vrf context management
+hardware access-list tcam region racl 256
+hardware access-list tcam region e-racl 0
+hardware access-list tcam region arp-ether 256
+vpc domain 1
+  peer-switch
+  role priority 2000
+  peer-keepalive destination 10.101.113.1 source 10.101.113.2 vrf VRF_VPC-KEEPALIVE
+  auto-recovery
+  ip arp synchronize
+
+
+interface Vlan1
+
+interface Vlan10
+  no shutdown
+  vrf member LABA
+  ip address 172.24.10.1/24
+  fabric forwarding mode anycast-gateway
+
+interface Vlan20
+  no shutdown
+  vrf member LABA
+  ip address 172.24.20.1/24
+  fabric forwarding mode anycast-gateway
+
+interface Vlan1010
+  no shutdown
+  vrf member LABA
+  ip forward
+
+interface port-channel15
+  description *** SW-1 ***
+  switchport mode trunk
+  switchport trunk allowed vlan 10,20
+  speed 1000
+  vpc 15
+
+interface port-channel100
+  description *** VPC PEER LINKS ***
+  switchport mode trunk
+  spanning-tree port type network
+  vpc peer-link
+
+interface nve1
+  no shutdown
+  host-reachability protocol bgp
+  source-interface loopback2
+  member vni 51010 associate-vrf
+  member vni 10000010
+    ingress-replication protocol bgp
+  member vni 10000020
+    ingress-replication protocol bgp
+
+interface Ethernet1/1
+  description to_spine_1
+  no switchport
+  ip address 10.101.214.6/30
+  isis metric 100 level-1
+  isis metric 100 level-2
+  isis network point-to-point
+  ip router isis UNDERLAY
+  no isis passive-interface level-1-2
+  no shutdown
+
+interface Ethernet1/2
+  description to_spine_2
+  no switchport
+  ip address 10.101.224.6/30
+  isis metric 100 level-1
+  isis metric 100 level-2
+  isis network point-to-point
+  ip router isis UNDERLAY
+  no isis passive-interface level-1-2
+  no shutdown
+
+interface Ethernet1/3
+  shutdown
+
+interface Ethernet1/4
+  shutdown
+
+interface Ethernet1/5
+
+interface Ethernet1/6
+  shutdown
+
+interface Ethernet1/7
+  shutdown
+
+interface Ethernet1/8
+  description *** SW-1 ***
+  switchport mode trunk
+  switchport trunk allowed vlan 10,20
+  speed 1000
+  channel-group 15
+
+interface Ethernet1/9
+  shutdown
+
+interface Ethernet1/10
+
+interface Ethernet1/11
+  shutdown
+
+interface Ethernet1/12
+  shutdown
+
+interface Ethernet1/13
+  description *** VPC PEER LINKS ***
+  switchport mode trunk
+  channel-group 100 mode active
+
+interface Ethernet1/14
+  description *** VPC PEER LINKS ***
+  switchport mode trunk
+  channel-group 100 mode active
+
+interface Ethernet1/15
+  description vPC K/A to_leaf-1
+  no switchport
+  vrf member VRF_VPC-KEEPALIVE
+  ip address 10.101.113.2/30
+  no shutdown
+
+interface Ethernet1/16
+
+interface Ethernet1/17
+
+interface Ethernet1/18
+
+interface Ethernet1/19
+
+interface Ethernet1/20
+
+interface Ethernet1/21
+
+interface Ethernet1/22
+
+interface Ethernet1/23
+
+interface Ethernet1/24
+
+interface Ethernet1/25
+
+interface Ethernet1/26
+
+interface Ethernet1/27
+
+interface Ethernet1/28
+
+interface Ethernet1/29
+
+interface Ethernet1/30
+
+interface Ethernet1/31
+
+interface Ethernet1/32
+
+interface Ethernet1/33
+
+interface Ethernet1/34
+
+interface Ethernet1/35
+
+interface Ethernet1/36
+
+interface Ethernet1/37
+
+interface Ethernet1/38
+
+interface Ethernet1/39
+
+interface Ethernet1/40
+
+interface Ethernet1/41
+
+interface Ethernet1/42
+
+interface Ethernet1/43
+
+interface Ethernet1/44
+
+interface Ethernet1/45
+
+interface Ethernet1/46
+
+interface Ethernet1/47
+
+interface Ethernet1/48
+
+interface Ethernet1/49
+
+interface Ethernet1/50
+
+interface Ethernet1/51
+
+interface Ethernet1/52
+
+interface Ethernet1/53
+
+interface Ethernet1/54
+
+interface Ethernet1/55
+
+interface Ethernet1/56
+
+interface Ethernet1/57
+
+interface Ethernet1/58
+
+interface Ethernet1/59
+
+interface Ethernet1/60
+
+interface Ethernet1/61
+
+interface Ethernet1/62
+
+interface Ethernet1/63
+
+interface Ethernet1/64
+
+interface mgmt0
+  vrf member management
+
+interface loopback1
+  description # Router ID
+  ip address 10.101.121.1/32
+  ip router isis UNDERLAY
+
+interface loopback2
+  description # VTEP-ID
+  ip address 10.101.122.1/32
+  ip address 10.101.112.2/32 secondary
+  ip router isis UNDERLAY
+icam monitor scale
+
+cli alias name wr copy run start
+cli alias name c conf term
+cli alias name sir show ip route
+cli alias name srr sh run | sec router
+cli alias name hi sh cli history unformatted
+line console
+  exec-timeout 0
+  terminal length 48
+  terminal width  186
+line vty
+boot nxos bootflash:/nxos.9.3.8.bin sup-1
+router isis UNDERLAY
+  net 49.0001.0101.0112.1001.00
+  log-adjacency-changes
+  authentication-type md5 level-1
+  authentication-type md5 level-2
+  authentication key-chain ISIS level-1
+  authentication key-chain ISIS level-2
+  address-family ipv4 unicast
+    maximum-paths 2
+    router-id loopback1
+  passive-interface default level-1-2
+router bgp 65010
+  router-id 10.101.122.1
+  template peer SPINES
+    remote-as 65010
+    update-source loopback2
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+  neighbor 10.101.212.1
+    inherit peer SPINES
+    description Spine-1
+  neighbor 10.101.222.1
+    inherit peer SPINES
+    description Spine-2
+  vrf DEMO
+    address-family ipv4 unicast
+      redistribute direct route-map RM_PERMIT_IPv4
+      redistribute hmm route-map RM_PERMIT_IPv4
+  vrf LABA
+    address-family ipv4 unicast
+      redistribute direct route-map RM_PERMIT_IPv4
+      redistribute hmm route-map RM_PERMIT_IPv4
+
 
 
 Leaf-R2# 
@@ -1340,6 +2045,389 @@ Leaf-R2#
 ```text
 Leaf-R3# sh run
 
+!Command: show running-config
+!Running configuration last done at: Thu Jan 30 15:18:35 2025
+!Time: Thu Jan 30 16:22:35 2025
+
+version 9.3(8) Bios:version  
+hostname Leaf-R3
+vdc Leaf-R3 id 1
+  limit-resource vlan minimum 16 maximum 4094
+  limit-resource vrf minimum 2 maximum 4096
+  limit-resource port-channel minimum 0 maximum 511
+  limit-resource u4route-mem minimum 248 maximum 248
+  limit-resource u6route-mem minimum 96 maximum 96
+  limit-resource m4route-mem minimum 58 maximum 58
+  limit-resource m6route-mem minimum 8 maximum 8
+
+cfs eth distribute
+nv overlay evpn
+feature bgp
+feature isis
+feature fabric forwarding
+feature interface-vlan
+feature vn-segment-vlan-based
+clock timezone PRM 5 0
+feature nv overlay
+
+no password strength-check
+username admin password 5 $5$MLCBMA$/FmotzYqQwdMEJQGtVLJtp3JkUAzX/Me2FliX2AYk38  role network-admin
+ip domain-lookup
+copp profile strict
+snmp-server user admin auth md5 0071FC9DD80C21F0E05AEDD7D7A8ADA024A4 priv 3209C8E6BC345CF9ED32FE94D0BCAA9125B4 localizedV2key engineID 128:0:0:9:3:12:56:0:0:27:1
+rmon event 1 log trap public description FATAL(1) owner PMON@FATAL
+rmon event 2 log trap public description CRITICAL(2) owner PMON@CRITICAL
+rmon event 3 log trap public description ERROR(3) owner PMON@ERROR
+rmon event 4 log trap public description WARNING(4) owner PMON@WARNING
+rmon event 5 log trap public description INFORMATION(5) owner PMON@INFO
+
+fabric forwarding anycast-gateway-mac 0001.0001.0001
+vlan 1,10,20,30,1010,1030
+vlan 10
+  vn-segment 10000010
+vlan 20
+  vn-segment 10000020
+vlan 30
+  vn-segment 10000030
+vlan 1010
+  vn-segment 51010
+vlan 1030
+  vn-segment 51030
+
+key chain ISIS
+  key 1
+    key-string 7 070c285f4d064b0916100a
+vrf context DEMO
+  vni 51030
+  rd auto
+  address-family ipv4 unicast
+    route-target both auto
+    route-target both auto evpn
+vrf context LABA
+  vni 51010
+  rd auto
+  address-family ipv4 unicast
+    route-target both auto
+    route-target both auto evpn
+vrf context VRF_VPC-KEEPALIVE
+  address-family ipv4 unicast
+vrf context management
+
+
+interface Vlan1
+
+interface Vlan10
+  no shutdown
+  vrf member LABA
+  ip address 172.24.10.1/24
+  fabric forwarding mode anycast-gateway
+
+interface Vlan20
+  no shutdown
+  vrf member LABA
+  ip address 172.24.20.1/24
+  fabric forwarding mode anycast-gateway
+
+interface Vlan30
+  description # Member vrf DEMO #
+  no shutdown
+  vrf member DEMO
+  ip address 172.24.30.1/24
+  fabric forwarding mode anycast-gateway
+
+interface Vlan1010
+  no shutdown
+  vrf member LABA
+  ip forward
+
+interface Vlan1030
+  no shutdown
+  vrf member DEMO
+  ip forward
+
+interface nve1
+  no shutdown
+  host-reachability protocol bgp
+  source-interface loopback2
+  member vni 51010 associate-vrf
+  member vni 51030 associate-vrf
+  member vni 10000010
+    ingress-replication protocol bgp
+  member vni 10000020
+    ingress-replication protocol bgp
+  member vni 10000030
+    ingress-replication protocol bgp
+
+interface Ethernet1/1
+  description to_spine_1
+  no switchport
+  ip address 10.101.214.10/30
+  isis metric 100 level-1
+  isis metric 100 level-2
+  isis network point-to-point
+  ip router isis UNDERLAY
+  no isis passive-interface level-1-2
+  no shutdown
+
+interface Ethernet1/2
+  description to_spine_2
+  no switchport
+  ip address 10.101.224.10/30
+  isis metric 100 level-1
+  isis metric 100 level-2
+  isis network point-to-point
+  ip router isis UNDERLAY
+  no isis passive-interface level-1-2
+  no shutdown
+
+interface Ethernet1/3
+  shutdown
+
+interface Ethernet1/4
+  shutdown
+
+interface Ethernet1/5
+  description *** to_HOST-R3 ***
+  switchport access vlan 10
+
+interface Ethernet1/6
+  description *** to_HOST-R31 ***
+  switchport access vlan 30
+
+interface Ethernet1/7
+  shutdown
+
+interface Ethernet1/8
+  shutdown
+
+interface Ethernet1/9
+  shutdown
+
+interface Ethernet1/10
+  shutdown
+
+interface Ethernet1/11
+  shutdown
+
+interface Ethernet1/12
+  shutdown
+
+interface Ethernet1/13
+  shutdown
+
+interface Ethernet1/14
+  shutdown
+
+interface Ethernet1/15
+  shutdown
+
+interface Ethernet1/16
+  shutdown
+
+interface Ethernet1/17
+  shutdown
+
+interface Ethernet1/18
+  shutdown
+
+interface Ethernet1/19
+  shutdown
+
+interface Ethernet1/20
+  shutdown
+
+interface Ethernet1/21
+  shutdown
+
+interface Ethernet1/22
+  shutdown
+
+interface Ethernet1/23
+  shutdown
+
+interface Ethernet1/24
+  shutdown
+
+interface Ethernet1/25
+  shutdown
+
+interface Ethernet1/26
+  shutdown
+
+interface Ethernet1/27
+  shutdown
+
+interface Ethernet1/28
+  shutdown
+
+interface Ethernet1/29
+  shutdown
+
+interface Ethernet1/30
+  shutdown
+
+interface Ethernet1/31
+  shutdown
+
+interface Ethernet1/32
+  shutdown
+
+interface Ethernet1/33
+  shutdown
+
+interface Ethernet1/34
+  shutdown
+
+interface Ethernet1/35
+  shutdown
+
+interface Ethernet1/36
+  shutdown
+
+interface Ethernet1/37
+  shutdown
+
+interface Ethernet1/38
+  shutdown
+
+interface Ethernet1/39
+  shutdown
+
+interface Ethernet1/40
+  shutdown
+
+interface Ethernet1/41
+  shutdown
+
+interface Ethernet1/42
+  shutdown
+
+interface Ethernet1/43
+  shutdown
+
+interface Ethernet1/44
+  shutdown
+
+interface Ethernet1/45
+  shutdown
+
+interface Ethernet1/46
+  shutdown
+
+interface Ethernet1/47
+  shutdown
+
+interface Ethernet1/48
+  shutdown
+
+interface Ethernet1/49
+  shutdown
+
+interface Ethernet1/50
+  shutdown
+
+interface Ethernet1/51
+  shutdown
+
+interface Ethernet1/52
+  shutdown
+
+interface Ethernet1/53
+  shutdown
+
+interface Ethernet1/54
+  shutdown
+
+interface Ethernet1/55
+  shutdown
+
+interface Ethernet1/56
+  shutdown
+
+interface Ethernet1/57
+  shutdown
+
+interface Ethernet1/58
+  shutdown
+
+interface Ethernet1/59
+  shutdown
+
+interface Ethernet1/60
+  shutdown
+
+interface Ethernet1/61
+  shutdown
+
+interface Ethernet1/62
+  shutdown
+
+interface Ethernet1/63
+  shutdown
+
+interface Ethernet1/64
+  shutdown
+
+interface mgmt0
+  vrf member management
+
+interface loopback1
+  description # Router-ID
+  ip address 10.101.131.1/32
+  ip router isis UNDERLAY
+
+interface loopback2
+  description # VTEP-ID
+  ip address 10.101.132.1/32
+  ip router isis UNDERLAY
+icam monitor scale
+
+cli alias name wr copy run start
+cli alias name c conf term
+cli alias name sir show ip route
+cli alias name srr sh run | sec router
+cli alias name hi sh cli history unformatted
+line console
+  exec-timeout 0
+  terminal length 48
+  terminal width  186
+line vty
+boot nxos bootflash:/nxos.9.3.8.bin sup-1
+router isis UNDERLAY
+  net 49.0001.0101.0113.1001.00
+  log-adjacency-changes
+  authentication-type md5 level-1
+  authentication-type md5 level-2
+  authentication key-chain ISIS level-1
+  authentication key-chain ISIS level-2
+  address-family ipv4 unicast
+    maximum-paths 2
+    router-id loopback1
+  passive-interface default level-1-2
+router bgp 65010
+  router-id 10.101.132.1
+  template peer SPINES
+    remote-as 65010
+    update-source loopback2
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+  neighbor 10.101.212.1
+    inherit peer SPINES
+    description Spne-1
+  neighbor 10.101.222.1
+    inherit peer SPINES
+    description Spne-2
+  vrf DEMO
+    address-family ipv4 unicast
+      redistribute direct route-map RM_PERMIT_IPv4
+      redistribute hmm route-map RM_PERMIT_IPv4
+  vrf LABA
+    address-family ipv4 unicast
+      redistribute direct route-map RM_PERMIT_IPv4
+      redistribute hmm route-map RM_PERMIT_IPv4
+
+
 
 Leaf-R3#
 ```
@@ -1351,6 +2439,399 @@ Leaf-R3#
 
 ```text
 Leaf-R4# sh run
+
+!Command: show running-config
+!Running configuration last done at: Thu Jan 30 15:50:46 2025
+!Time: Thu Jan 30 16:22:36 2025
+
+version 9.3(8) Bios:version  
+hostname Leaf-R4
+vdc Leaf-R4 id 1
+  limit-resource vlan minimum 16 maximum 4094
+  limit-resource vrf minimum 2 maximum 4096
+  limit-resource port-channel minimum 0 maximum 511
+  limit-resource u4route-mem minimum 248 maximum 248
+  limit-resource u6route-mem minimum 96 maximum 96
+  limit-resource m4route-mem minimum 58 maximum 58
+  limit-resource m6route-mem minimum 8 maximum 8
+
+cfs eth distribute
+nv overlay evpn
+feature bgp
+feature isis
+feature fabric forwarding
+feature interface-vlan
+feature vn-segment-vlan-based
+clock timezone PRM 5 0
+feature nv overlay
+
+no password strength-check
+username admin password 5 $5$BDBCEE$74zNdCRevQ.jaXtPvMgU3sqqUKyzxCYbO8iNikWmj9D  role network-admin
+ip domain-lookup
+copp profile strict
+snmp-server user admin auth md5 494710BA78F370F1A7A09EC13507B82FC249 priv 1748459848CB1184D7D38CC22B7CFB659E0B localizedV2key engineID 128:0:0:9:3:12:37:0:0:27:1
+rmon event 1 log trap public description FATAL(1) owner PMON@FATAL
+rmon event 2 log trap public description CRITICAL(2) owner PMON@CRITICAL
+rmon event 3 log trap public description ERROR(3) owner PMON@ERROR
+rmon event 4 log trap public description WARNING(4) owner PMON@WARNING
+rmon event 5 log trap public description INFORMATION(5) owner PMON@INFO
+
+fabric forwarding anycast-gateway-mac 0001.0001.0001
+vlan 1,10,20,30,1010,1030
+vlan 10
+  vn-segment 10000010
+vlan 20
+  vn-segment 10000020
+vlan 30
+  vn-segment 10000030
+vlan 1010
+  vn-segment 51010
+vlan 1030
+  vn-segment 51030
+
+route-map RM_PERMIT_IPv4 permit 10
+key chain ISIS
+  key 1
+    key-string 7 070c285f4d064b0916100a
+vrf context DEMO
+  vni 51030
+  rd auto
+  address-family ipv4 unicast
+    route-target both auto
+    route-target both auto evpn
+    route-target import 65010:51010
+    route-target import 65010:51010 evpn
+    route-target export 65010:51030
+    route-target export 65010:51030 evpn
+vrf context LABA
+  vni 51010
+  rd auto
+  address-family ipv4 unicast
+    route-target both auto
+    route-target both auto evpn
+    route-target import 65010:51030
+    route-target import 65010:51030 evpn
+    route-target export 65010:51010
+    route-target export 65010:51010 evpn
+vrf context VRF_VPC-KEEPALIVE
+vrf context management
+
+
+interface Vlan1
+
+interface Vlan10
+  description # Member vrf LABA #
+  no shutdown
+  vrf member LABA
+  ip address 172.24.10.1/24
+  fabric forwarding mode anycast-gateway
+
+interface Vlan20
+  description # Member vrf LABA #
+  no shutdown
+  vrf member LABA
+  ip address 172.24.20.1/24
+  fabric forwarding mode anycast-gateway
+
+interface Vlan30
+  description # Member vrf DEMO #
+  no shutdown
+  vrf member DEMO
+  ip address 172.24.30.1/24
+  fabric forwarding mode anycast-gateway
+
+interface Vlan1010
+  no shutdown
+  vrf member LABA
+  ip forward
+
+interface Vlan1030
+  no shutdown
+  vrf member DEMO
+  ip forward
+
+interface nve1
+  no shutdown
+  host-reachability protocol bgp
+  source-interface loopback2
+  member vni 51010 associate-vrf
+  member vni 51030 associate-vrf
+  member vni 10000010
+    ingress-replication protocol bgp
+  member vni 10000020
+    ingress-replication protocol bgp
+  member vni 10000030
+    ingress-replication protocol bgp
+
+interface Ethernet1/1
+  description to_spine_1
+  no switchport
+  ip address 10.101.214.14/30
+  isis metric 100 level-1
+  isis metric 100 level-2
+  isis network point-to-point
+  ip router isis UNDERLAY
+  no isis passive-interface level-1-2
+  no shutdown
+
+interface Ethernet1/2
+  description to_spine_2
+  no switchport
+  ip address 10.101.224.14/30
+  isis metric 100 level-1
+  isis metric 100 level-2
+  isis network point-to-point
+  ip router isis UNDERLAY
+  no isis passive-interface level-1-2
+  no shutdown
+
+interface Ethernet1/3
+  shutdown
+
+interface Ethernet1/4
+  shutdown
+
+interface Ethernet1/5
+  description *** to_HOST-R4 ***
+  switchport access vlan 30
+
+interface Ethernet1/6
+  description *** to_HOST-R5 ***
+  switchport access vlan 20
+
+interface Ethernet1/7
+  shutdown
+
+interface Ethernet1/8
+  shutdown
+
+interface Ethernet1/9
+  shutdown
+
+interface Ethernet1/10
+  shutdown
+
+interface Ethernet1/11
+  shutdown
+
+interface Ethernet1/12
+  shutdown
+
+interface Ethernet1/13
+  shutdown
+
+interface Ethernet1/14
+  shutdown
+
+interface Ethernet1/15
+  shutdown
+
+interface Ethernet1/16
+  shutdown
+
+interface Ethernet1/17
+  shutdown
+
+interface Ethernet1/18
+  shutdown
+
+interface Ethernet1/19
+  shutdown
+
+interface Ethernet1/20
+  shutdown
+
+interface Ethernet1/21
+  shutdown
+
+interface Ethernet1/22
+  shutdown
+
+interface Ethernet1/23
+  shutdown
+
+interface Ethernet1/24
+  shutdown
+
+interface Ethernet1/25
+  shutdown
+
+interface Ethernet1/26
+  shutdown
+
+interface Ethernet1/27
+  shutdown
+
+interface Ethernet1/28
+  shutdown
+
+interface Ethernet1/29
+  shutdown
+
+interface Ethernet1/30
+  shutdown
+
+interface Ethernet1/31
+  shutdown
+
+interface Ethernet1/32
+  shutdown
+
+interface Ethernet1/33
+  shutdown
+
+interface Ethernet1/34
+  shutdown
+
+interface Ethernet1/35
+  shutdown
+
+interface Ethernet1/36
+  shutdown
+
+interface Ethernet1/37
+  shutdown
+
+interface Ethernet1/38
+  shutdown
+
+interface Ethernet1/39
+  shutdown
+
+interface Ethernet1/40
+  shutdown
+
+interface Ethernet1/41
+  shutdown
+
+interface Ethernet1/42
+  shutdown
+
+interface Ethernet1/43
+  shutdown
+
+interface Ethernet1/44
+  shutdown
+
+interface Ethernet1/45
+  shutdown
+
+interface Ethernet1/46
+  shutdown
+
+interface Ethernet1/47
+  shutdown
+
+interface Ethernet1/48
+  shutdown
+
+interface Ethernet1/49
+  shutdown
+
+interface Ethernet1/50
+  shutdown
+
+interface Ethernet1/51
+  shutdown
+
+interface Ethernet1/52
+  shutdown
+
+interface Ethernet1/53
+  shutdown
+
+interface Ethernet1/54
+  shutdown
+
+interface Ethernet1/55
+  shutdown
+
+interface Ethernet1/56
+  shutdown
+
+interface Ethernet1/57
+  shutdown
+
+interface Ethernet1/58
+  shutdown
+
+interface Ethernet1/59
+  shutdown
+
+interface Ethernet1/60
+  shutdown
+
+interface Ethernet1/61
+  shutdown
+
+interface Ethernet1/62
+  shutdown
+
+interface Ethernet1/63
+  shutdown
+
+interface Ethernet1/64
+  shutdown
+
+interface mgmt0
+  vrf member management
+
+interface loopback1
+  description # Router-ID
+  ip address 10.101.141.1/32
+  ip router isis UNDERLAY
+
+interface loopback2
+  description # VTEP-ID
+  ip address 10.101.142.1/32
+  ip router isis UNDERLAY
+icam monitor scale
+
+cli alias name wr copy run start
+cli alias name c conf term
+cli alias name sir show ip route
+cli alias name srr sh run | sec router
+cli alias name hi sh cli history unformatted
+line console
+  exec-timeout 0
+  terminal length 48
+  terminal width  186
+line vty
+boot nxos bootflash:/nxos.9.3.8.bin sup-1
+router isis UNDERLAY
+  net 49.0001.0101.0114.1001.00
+  log-adjacency-changes
+  authentication-type md5 level-1
+  authentication-type md5 level-2
+  authentication key-chain ISIS level-1
+  authentication key-chain ISIS level-2
+  address-family ipv4 unicast
+    maximum-paths 2
+    router-id loopback1
+  passive-interface default level-1-2
+router bgp 65010
+  router-id 10.101.142.1
+  template peer SPINES
+    remote-as 65010
+    update-source loopback2
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+  neighbor 10.101.212.1
+    inherit peer SPINES
+    description Spne-1
+  neighbor 10.101.222.1
+    inherit peer SPINES
+    description Spne-2
+  vrf DEMO
+    address-family ipv4 unicast
+      redistribute direct route-map RM_PERMIT_IPv4
+      redistribute hmm route-map RM_PERMIT_IPv4
+  vrf LABA
+    address-family ipv4 unicast
+      redistribute direct route-map RM_PERMIT_IPv4
+      redistribute hmm route-map RM_PERMIT_IPv4
+
 
 
 Leaf-R4# 
@@ -1364,6 +2845,299 @@ Leaf-R4#
 ```text
 Spine-R1# sh run
 
+!Command: show running-config
+!Running configuration last done at: Mon Jan 27 21:21:22 2025
+!Time: Thu Jan 30 16:23:31 2025
+
+version 9.3(8) Bios:version  
+hostname Spine-R1
+vdc Spine-R1 id 1
+  limit-resource vlan minimum 16 maximum 4094
+  limit-resource vrf minimum 2 maximum 4096
+  limit-resource port-channel minimum 0 maximum 511
+  limit-resource u4route-mem minimum 248 maximum 248
+  limit-resource u6route-mem minimum 96 maximum 96
+  limit-resource m4route-mem minimum 58 maximum 58
+  limit-resource m6route-mem minimum 8 maximum 8
+
+nv overlay evpn
+feature bgp
+feature isis
+feature bfd
+clock timezone PRM 5 0
+
+no password strength-check
+username admin password 5 $5$OIECKA$eCLImHYIAUQ9wzeor80qlwAVQYm/.ZlN27uAmI7/1IB  role network-admin
+no ip domain-lookup
+copp profile strict
+snmp-server user admin auth md5 055F766176D1E6DAD4EE126B80F38ACA8E66 priv 483F7A661AC389D78EE04856D6ACADB9EA76 localizedV2key engineID 128:0:0:9:3:12:216:0:0:27:1
+rmon event 1 log trap public description FATAL(1) owner PMON@FATAL
+rmon event 2 log trap public description CRITICAL(2) owner PMON@CRITICAL
+rmon event 3 log trap public description ERROR(3) owner PMON@ERROR
+rmon event 4 log trap public description WARNING(4) owner PMON@WARNING
+rmon event 5 log trap public description INFORMATION(5) owner PMON@INFO
+
+vlan 1
+
+key chain ISIS
+  key 1
+    key-string 7 070c285f4d064b0916100a
+vrf context management
+
+
+interface Ethernet1/1
+  description to_leaf_1
+  no cdp enable
+  no switchport
+  bfd interval 999 min_rx 999 multiplier 3
+  bfd authentication Keyed-SHA1 key-id 1 hex-key 636973636F326C616261
+  no ip redirects
+  ip address 10.101.214.1/30
+  no ipv6 redirects
+  isis metric 100 level-1
+  isis metric 100 level-2
+  isis network point-to-point
+  ip router isis UNDERLAY
+  no isis passive-interface level-1-2
+  isis bfd disable
+  no shutdown
+
+interface Ethernet1/2
+  description to_leaf_2
+  no switchport
+  ip address 10.101.214.5/30
+  isis metric 100 level-1
+  isis metric 100 level-2
+  isis network point-to-point
+  ip router isis UNDERLAY
+  no isis passive-interface level-1-2
+  no shutdown
+
+interface Ethernet1/3
+  description to_leaf_3
+  no switchport
+  ip address 10.101.214.9/30
+  isis metric 100 level-1
+  isis metric 100 level-2
+  isis network point-to-point
+  ip router isis UNDERLAY
+  no isis passive-interface level-1-2
+  no shutdown
+
+interface Ethernet1/4
+  description to_leaf_4
+  no switchport
+  ip address 10.101.214.13/30
+  isis metric 100 level-1
+  isis metric 100 level-2
+  isis network point-to-point
+  ip router isis UNDERLAY
+  no isis passive-interface level-1-2
+  no shutdown
+
+interface Ethernet1/5
+  shutdown
+
+interface Ethernet1/6
+  description to_brdleaf-1
+  no switchport
+  ip address 10.101.14.1/30
+  isis network point-to-point
+  ip router isis UNDERLAY
+  no isis passive-interface level-1-2
+  no shutdown
+
+interface Ethernet1/7
+  description to_brdleaf-2
+  no switchport
+  ip address 10.101.14.5/30
+  isis network point-to-point
+  ip router isis UNDERLAY
+  no isis passive-interface level-1-2
+  no shutdown
+
+interface Ethernet1/8
+  shutdown
+
+interface Ethernet1/9
+  shutdown
+
+interface Ethernet1/10
+
+interface Ethernet1/11
+
+interface Ethernet1/12
+
+interface Ethernet1/13
+
+interface Ethernet1/14
+
+interface Ethernet1/15
+
+interface Ethernet1/16
+
+interface Ethernet1/17
+
+interface Ethernet1/18
+
+interface Ethernet1/19
+
+interface Ethernet1/20
+
+interface Ethernet1/21
+
+interface Ethernet1/22
+
+interface Ethernet1/23
+
+interface Ethernet1/24
+
+interface Ethernet1/25
+
+interface Ethernet1/26
+
+interface Ethernet1/27
+
+interface Ethernet1/28
+
+interface Ethernet1/29
+
+interface Ethernet1/30
+
+interface Ethernet1/31
+
+interface Ethernet1/32
+
+interface Ethernet1/33
+
+interface Ethernet1/34
+
+interface Ethernet1/35
+
+interface Ethernet1/36
+
+interface Ethernet1/37
+
+interface Ethernet1/38
+
+interface Ethernet1/39
+
+interface Ethernet1/40
+
+interface Ethernet1/41
+
+interface Ethernet1/42
+
+interface Ethernet1/43
+
+interface Ethernet1/44
+
+interface Ethernet1/45
+
+interface Ethernet1/46
+
+interface Ethernet1/47
+
+interface Ethernet1/48
+
+interface Ethernet1/49
+
+interface Ethernet1/50
+
+interface Ethernet1/51
+
+interface Ethernet1/52
+
+interface Ethernet1/53
+
+interface Ethernet1/54
+
+interface Ethernet1/55
+
+interface Ethernet1/56
+
+interface Ethernet1/57
+
+interface Ethernet1/58
+
+interface Ethernet1/59
+
+interface Ethernet1/60
+
+interface Ethernet1/61
+
+interface Ethernet1/62
+
+interface Ethernet1/63
+
+interface Ethernet1/64
+
+interface mgmt0
+  vrf member management
+
+interface loopback1
+  description # Router ID
+  ip address 10.101.211.1/32
+  ip router isis UNDERLAY
+
+interface loopback2
+  description # VTEP-ID
+  ip address 10.101.212.1/32
+  ip router isis UNDERLAY
+icam monitor scale
+
+cli alias name wr copy run start
+cli alias name c conf term
+cli alias name sir show ip route
+cli alias name cef show forwarding ipv4 
+cli alias name adj show ip adj
+cli alias name hash show routing hash
+cli alias name fadj show forwarding adjacency
+cli alias name srr sh run | sec router
+line console
+  exec-timeout 0
+  terminal length 48
+  terminal width  186
+line vty
+boot nxos bootflash:/nxos.9.3.8.bin sup-1
+router isis UNDERLAY
+  net 49.0001.0101.0121.1001.00
+  set-overload-bit on-startup 20
+  log-adjacency-changes
+  authentication-type md5 level-1
+  authentication-type md5 level-2
+  authentication key-chain ISIS level-1
+  authentication key-chain ISIS level-2
+  address-family ipv4 unicast
+    maximum-paths 2
+    router-id loopback1
+  passive-interface default level-1-2
+router bgp 65010
+  router-id 10.101.212.1
+  template peer LEAFS
+    remote-as 65010
+    update-source loopback2
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+      route-reflector-client
+  neighbor 10.101.12.1
+    inherit peer LEAFS
+    description BRF-Leaf-R1
+  neighbor 10.101.112.1
+    inherit peer LEAFS
+    description Leaf-1
+  neighbor 10.101.122.1
+    inherit peer LEAFS
+    description Leaf-2
+  neighbor 10.101.132.1
+    inherit peer LEAFS
+    description Leaf-3
+  neighbor 10.101.142.1
+    inherit peer LEAFS
+    description Leaf-4
+
+
 
 Spine-R1# 
 ```
@@ -1376,6 +3150,291 @@ Spine-R1#
 ```text
 Spine-R2# sh run
 
+!Command: show running-config
+!Running configuration last done at: Mon Jan 27 16:23:27 2025
+!Time: Thu Jan 30 11:23:58 2025
+
+version 9.3(8) Bios:version  
+hostname Spine-R2
+vdc Spine-R2 id 1
+  limit-resource vlan minimum 16 maximum 4094
+  limit-resource vrf minimum 2 maximum 4096
+  limit-resource port-channel minimum 0 maximum 511
+  limit-resource u4route-mem minimum 248 maximum 248
+  limit-resource u6route-mem minimum 96 maximum 96
+  limit-resource m4route-mem minimum 58 maximum 58
+  limit-resource m6route-mem minimum 8 maximum 8
+
+nv overlay evpn
+feature bgp
+feature isis
+
+no password strength-check
+username admin password 5 $5$PEIEFP$MPKQtVARlyYowD1AGfD7kttGnjbI5D92bO1H5HAKt4C  role network-admin
+ip domain-lookup
+copp profile strict
+snmp-server user admin auth md5 1779710CBD3CD4D9906FA7637BD9A4AAC204 priv 4973727EC11CEFECA116BF6262FBE9B29245 localizedV2key engineID 128:0:0:9:3:12:251:0:0:27:1
+rmon event 1 log trap public description FATAL(1) owner PMON@FATAL
+rmon event 2 log trap public description CRITICAL(2) owner PMON@CRITICAL
+rmon event 3 log trap public description ERROR(3) owner PMON@ERROR
+rmon event 4 log trap public description WARNING(4) owner PMON@WARNING
+rmon event 5 log trap public description INFORMATION(5) owner PMON@INFO
+
+vlan 1
+
+key chain ISIS
+  key 1
+    key-string 7 070c285f4d064b0916100a
+vrf context management
+
+
+interface Ethernet1/1
+  description to_leaf_1
+  no switchport
+  ip address 10.101.224.1/30
+  isis metric 100 level-1
+  isis metric 100 level-2
+  isis network point-to-point
+  ip router isis UNDERLAY
+  no isis passive-interface level-1-2
+  no shutdown
+
+interface Ethernet1/2
+  description to_leaf_2
+  no switchport
+  ip address 10.101.224.5/30
+  isis metric 100 level-1
+  isis metric 100 level-2
+  isis network point-to-point
+  ip router isis UNDERLAY
+  no isis passive-interface level-1-2
+  no shutdown
+
+interface Ethernet1/3
+  description to_leaf_3
+  no switchport
+  ip address 10.101.224.9/30
+  isis metric 100 level-1
+  isis metric 100 level-2
+  isis network point-to-point
+  ip router isis UNDERLAY
+  no isis passive-interface level-1-2
+  no shutdown
+
+interface Ethernet1/4
+  description to_leaf_4
+  no switchport
+  ip address 10.101.224.13/30
+  isis metric 100 level-1
+  isis metric 100 level-2
+  isis network point-to-point
+  ip router isis UNDERLAY
+  no isis passive-interface level-1-2
+  no shutdown
+
+interface Ethernet1/5
+  shutdown
+
+interface Ethernet1/6
+  description to_brdleaf-1
+  no switchport
+  ip address 10.101.24.1/30
+  isis network point-to-point
+  ip router isis UNDERLAY
+  no isis passive-interface level-1-2
+  no shutdown
+
+interface Ethernet1/7
+  description to_brdleaf-2
+  no switchport
+  ip address 10.101.24.5/30
+  isis network point-to-point
+  ip router isis UNDERLAY
+  no isis passive-interface level-1-2
+  no shutdown
+
+interface Ethernet1/8
+  shutdown
+
+interface Ethernet1/9
+  shutdown
+
+interface Ethernet1/10
+
+interface Ethernet1/11
+
+interface Ethernet1/12
+
+interface Ethernet1/13
+
+interface Ethernet1/14
+
+interface Ethernet1/15
+
+interface Ethernet1/16
+
+interface Ethernet1/17
+
+interface Ethernet1/18
+
+interface Ethernet1/19
+
+interface Ethernet1/20
+
+interface Ethernet1/21
+
+interface Ethernet1/22
+
+interface Ethernet1/23
+
+interface Ethernet1/24
+
+interface Ethernet1/25
+
+interface Ethernet1/26
+
+interface Ethernet1/27
+
+interface Ethernet1/28
+
+interface Ethernet1/29
+
+interface Ethernet1/30
+
+interface Ethernet1/31
+
+interface Ethernet1/32
+
+interface Ethernet1/33
+
+interface Ethernet1/34
+
+interface Ethernet1/35
+
+interface Ethernet1/36
+
+interface Ethernet1/37
+
+interface Ethernet1/38
+
+interface Ethernet1/39
+
+interface Ethernet1/40
+
+interface Ethernet1/41
+
+interface Ethernet1/42
+
+interface Ethernet1/43
+
+interface Ethernet1/44
+
+interface Ethernet1/45
+
+interface Ethernet1/46
+
+interface Ethernet1/47
+
+interface Ethernet1/48
+
+interface Ethernet1/49
+
+interface Ethernet1/50
+
+interface Ethernet1/51
+
+interface Ethernet1/52
+
+interface Ethernet1/53
+
+interface Ethernet1/54
+
+interface Ethernet1/55
+
+interface Ethernet1/56
+
+interface Ethernet1/57
+
+interface Ethernet1/58
+
+interface Ethernet1/59
+
+interface Ethernet1/60
+
+interface Ethernet1/61
+
+interface Ethernet1/62
+
+interface Ethernet1/63
+
+interface Ethernet1/64
+
+interface mgmt0
+  vrf member management
+
+interface loopback1
+  description # Router ID
+  ip address 10.101.221.1/32
+  ip router isis UNDERLAY
+
+interface loopback2
+  description # VTEP-ID
+  ip address 10.101.222.1/32
+  ip router isis UNDERLAY
+icam monitor scale
+
+cli alias name wr copy run start
+cli alias name c conf term
+cli alias name sir show ip route
+cli alias name cef show forwarding ipv4 
+cli alias name adj show ip adj
+cli alias name hash show routing hash
+cli alias name fadj show forwarding adjacency
+cli alias name srr sh run | sec route
+line console
+  exec-timeout 0
+  terminal length 48
+  terminal width  186
+line vty
+boot nxos bootflash:/nxos.9.3.8.bin sup-1
+router isis UNDERLAY
+  net 49.0001.0101.0122.1001.00
+  set-overload-bit on-startup 20
+  log-adjacency-changes
+  authentication-type md5 level-1
+  authentication-type md5 level-2
+  authentication key-chain ISIS level-1
+  authentication key-chain ISIS level-2
+  address-family ipv4 unicast
+    maximum-paths 2
+    router-id loopback1
+  passive-interface default level-1-2
+router bgp 65010
+  router-id 10.101.222.1
+  template peer LEAFS
+    remote-as 65010
+    update-source loopback2
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+      route-reflector-client
+  neighbor 10.101.12.1
+    inherit peer LEAFS
+    description BRF-Leaf-R1
+  neighbor 10.101.112.1
+    inherit peer LEAFS
+    description Leaf-1
+  neighbor 10.101.122.1
+    inherit peer LEAFS
+    description Leaf-2
+  neighbor 10.101.132.1
+    inherit peer LEAFS
+    description Leaf-3
+  neighbor 10.101.142.1
+    inherit peer LEAFS
+    description Leaf-4
+
+
 
 Spine-R2#
 ```
@@ -1387,6 +3446,372 @@ Spine-R2#
 
 ```text
 BRF-Leaf-R1# sh run
+
+!Command: show running-config
+!Running configuration last done at: Thu Jan 30 13:44:01 2025
+!Time: Thu Jan 30 16:29:29 2025
+
+version 9.3(8) Bios:version  
+hostname BRF-Leaf-R1
+vdc BRF-Leaf-R1 id 1
+  limit-resource vlan minimum 16 maximum 4094
+  limit-resource vrf minimum 2 maximum 4096
+  limit-resource port-channel minimum 0 maximum 511
+  limit-resource u4route-mem minimum 248 maximum 248
+  limit-resource u6route-mem minimum 96 maximum 96
+  limit-resource m4route-mem minimum 58 maximum 58
+  limit-resource m6route-mem minimum 8 maximum 8
+
+nv overlay evpn
+feature bgp
+feature isis
+feature fabric forwarding
+feature interface-vlan
+feature vn-segment-vlan-based
+clock timezone PRM 5 0
+feature nv overlay
+
+no password strength-check
+username admin password 5 $5$MIDGHI$2nFpqu8C1skfYJz.nfv1.xMRxcwGOkEBjf3WOrg50kB  role network-admin
+no ip domain-lookup
+copp profile strict
+snmp-server user admin auth md5 3763E49E7388DDE1EE6ED8E11043B7613B48 priv 3239A4DB7EDE89AAAA62D4BD1817E56D6717 localizedV2key engineID 128:0:0:9:3:12:205:0:0:27:1
+rmon event 1 log trap public description FATAL(1) owner PMON@FATAL
+rmon event 2 log trap public description CRITICAL(2) owner PMON@CRITICAL
+rmon event 3 log trap public description ERROR(3) owner PMON@ERROR
+rmon event 4 log trap public description WARNING(4) owner PMON@WARNING
+rmon event 5 log trap public description INFORMATION(5) owner PMON@INFO
+
+fabric forwarding anycast-gateway-mac 0001.0001.0000
+ip route 0.0.0.0/0 172.24.2.2 tag 12
+vlan 1,10,20,30,1010,1030,1310,1330
+vlan 10
+  vn-segment 10000010
+vlan 20
+  vn-segment 10000020
+vlan 30
+  vn-segment 10000030
+vlan 1010
+  vn-segment 51010
+vlan 1030
+  vn-segment 51030
+vlan 1310
+  name VL10TOROUTER
+vlan 1330
+  name VL30TOROUTER
+
+ip prefix-list default seq 5 permit 0.0.0.0/0 
+ip prefix-list outbound-no-host description Allow only CIDR prefix send to router
+ip prefix-list outbound-no-host seq 10 deny 0.0.0.0/0 eq 32 
+ip prefix-list outbound-no-host seq 20 permit 0.0.0.0/0 le 32 
+route-map RM-BGP-DIRECT permit 10
+route-map default permit 10
+  match ip address prefix-list default 
+  match tag 12 
+key chain ISIS
+  key 1
+    key-string 7 070c285f4d064b0916100a
+    cryptographic-algorithm MD5
+vrf context DEMO
+  vni 51030
+  rd auto
+  address-family ipv4 unicast
+    route-target both auto
+    route-target both auto evpn
+vrf context LABA
+  vni 51010
+  rd auto
+  address-family ipv4 unicast
+    route-target both auto
+    route-target both auto evpn
+vrf context management
+hardware access-list tcam region e-racl 0
+hardware access-list tcam region span 0
+hardware access-list tcam region rp-qos 0
+hardware access-list tcam region rp-ipv6-qos 0
+hardware access-list tcam region rp-mac-qos 0
+hardware access-list tcam region e-ipv6-qos 256
+hardware access-list tcam region e-qos-lite 256
+hardware access-list tcam region arp-ether 256
+
+
+interface Vlan1
+
+interface Vlan10
+  no shutdown
+  vrf member LABA
+  ip address 172.24.10.1/24
+  fabric forwarding mode anycast-gateway
+
+interface Vlan20
+  no shutdown
+  vrf member LABA
+  ip address 172.24.20.1/24
+  fabric forwarding mode anycast-gateway
+
+interface Vlan30
+  description # Member vrf DEMO #
+  no shutdown
+  vrf member DEMO
+  ip address 172.24.30.1/24
+  fabric forwarding mode anycast-gateway
+
+interface Vlan1010
+  no shutdown
+  vrf member LABA
+  ip forward
+
+interface Vlan1030
+  no shutdown
+  vrf member DEMO
+  ip forward
+
+interface Vlan1310
+  no shutdown
+  vrf member LABA
+  no ip redirects
+  ip address 172.24.1.1/30
+
+interface Vlan1330
+  no shutdown
+  vrf member DEMO
+  no ip redirects
+  ip address 172.24.1.5/30
+
+interface nve1
+  no shutdown
+  host-reachability protocol bgp
+  source-interface loopback2
+  member vni 51010 associate-vrf
+  member vni 51030 associate-vrf
+  member vni 10000010
+    ingress-replication protocol bgp
+  member vni 10000020
+    ingress-replication protocol bgp
+  member vni 10000030
+    ingress-replication protocol bgp
+
+interface Ethernet1/1
+  description to_spine-1
+  no switchport
+  ip address 10.101.14.2/30
+  isis network point-to-point
+  ip router isis UNDERLAY
+  no isis passive-interface level-1-2
+  no shutdown
+
+interface Ethernet1/2
+  description to_spine-2
+  no switchport
+  ip address 10.101.24.2/30
+  isis network point-to-point
+  ip router isis UNDERLAY
+  no isis passive-interface level-1-2
+  no shutdown
+
+interface Ethernet1/3
+  shutdown
+
+interface Ethernet1/4
+  shutdown
+
+interface Ethernet1/5
+  shutdown
+
+interface Ethernet1/6
+  shutdown
+
+interface Ethernet1/7
+  shutdown
+
+interface Ethernet1/8
+  shutdown
+
+interface Ethernet1/9
+  description to_wan
+  switchport mode trunk
+  speed 1000
+  duplex full
+
+interface Ethernet1/10
+
+interface Ethernet1/11
+
+interface Ethernet1/12
+
+interface Ethernet1/13
+
+interface Ethernet1/14
+
+interface Ethernet1/15
+
+interface Ethernet1/16
+
+interface Ethernet1/17
+
+interface Ethernet1/18
+
+interface Ethernet1/19
+
+interface Ethernet1/20
+
+interface Ethernet1/21
+
+interface Ethernet1/22
+
+interface Ethernet1/23
+
+interface Ethernet1/24
+
+interface Ethernet1/25
+
+interface Ethernet1/26
+
+interface Ethernet1/27
+
+interface Ethernet1/28
+
+interface Ethernet1/29
+
+interface Ethernet1/30
+
+interface Ethernet1/31
+
+interface Ethernet1/32
+
+interface Ethernet1/33
+
+interface Ethernet1/34
+
+interface Ethernet1/35
+
+interface Ethernet1/36
+
+interface Ethernet1/37
+
+interface Ethernet1/38
+
+interface Ethernet1/39
+
+interface Ethernet1/40
+
+interface Ethernet1/41
+
+interface Ethernet1/42
+
+interface Ethernet1/43
+
+interface Ethernet1/44
+
+interface Ethernet1/45
+
+interface Ethernet1/46
+
+interface Ethernet1/47
+
+interface Ethernet1/48
+
+interface Ethernet1/49
+
+interface Ethernet1/50
+
+interface Ethernet1/51
+
+interface Ethernet1/52
+
+interface Ethernet1/53
+
+interface Ethernet1/54
+
+interface Ethernet1/55
+
+interface Ethernet1/56
+
+interface Ethernet1/57
+
+interface Ethernet1/58
+
+interface Ethernet1/59
+
+interface Ethernet1/60
+
+interface Ethernet1/61
+
+interface Ethernet1/62
+
+interface Ethernet1/63
+
+interface Ethernet1/64
+
+interface mgmt0
+  vrf member management
+
+interface loopback1
+  description # Router ID
+  ip address 10.101.11.1/32
+  ip router isis UNDERLAY
+
+interface loopback2
+  description # VTEP-ID
+  ip address 10.101.12.1/32
+  ip router isis UNDERLAY
+icam monitor scale
+
+cli alias name wr copy run start
+cli alias name c conf term
+cli alias name sir show ip route
+cli alias name srr sh run | sec router
+cli alias name stcam show hardware access-list tcam region 
+cli alias name hi sh cli history unformatted
+line console
+  exec-timeout 0
+  terminal length 48
+  terminal width  186
+line vty
+boot nxos bootflash:/nxos.9.3.8.bin sup-1
+router isis UNDERLAY
+  net 49.0001.0101.0101.1001.00
+  log-adjacency-changes
+  authentication-type md5 level-1
+  authentication-type md5 level-2
+  authentication key-chain ISIS level-1
+  authentication key-chain ISIS level-2
+  address-family ipv4 unicast
+    maximum-paths 2
+    redistribute static route-map default
+    router-id loopback1
+  vrf DEMO
+  vrf LABA
+  passive-interface default level-1-2
+router bgp 65010
+  router-id 10.101.12.1
+  address-family l2vpn evpn
+  template peer SPINES
+    remote-as 65010
+    update-source loopback2
+    address-family l2vpn evpn
+      send-community extended
+  neighbor 10.101.212.1
+    inherit peer SPINES
+    description Spne-1
+  neighbor 10.101.222.1
+    inherit peer SPINES
+    description Spne-2
+  vrf DEMO
+    router-id 172.24.1.5
+    neighbor 172.24.1.6
+      remote-as 1111
+      timers 7 21
+      address-family ipv4 unicast
+        prefix-list outbound-no-host out
+  vrf LABA
+    router-id 172.24.1.1
+    neighbor 172.24.1.2
+      remote-as 1111
+      timers 7 21
+      address-family ipv4 unicast
+        prefix-list outbound-no-host out
+
 
 
 BRF-Leaf-R1#
@@ -1641,7 +4066,209 @@ BRD-Leaf-R2#
 
 ```text
 ToWAN#sh run brief 
+Building configuration...
 
+Current configuration : 2983 bytes
+!
+! Last configuration change at 12:17:56 PRM Thu Jan 30 2025
+!
+version 17.12
+service timestamps debug datetime msec
+service timestamps log datetime msec
+!
+hostname ToWAN
+!
+boot-start-marker
+boot-end-marker
+!
+!
+logging console warnings
+no aaa new-model
+!
+!
+!
+clock timezone PRM 5 0
+no ip icmp rate-limit unreachable
+!
+!         
+!
+!
+!
+!
+!
+!
+!
+!
+no ip domain lookup
+ip cef
+login on-success log
+no ipv6 cef
+!
+!
+!
+!
+!
+!
+!
+!
+multilink bundle-name authenticated
+!
+!         
+key chain ISIS
+ key 1
+  key-string cisco2laba
+  cryptographic-algorithm md5
+!
+crypto pki trustpoint TP-self-signed-2043905
+ enrollment selfsigned
+ subject-name cn=IOS-Self-Signed-Certificate-2043905
+ revocation-check none
+ rsakeypair TP-self-signed-2043905
+ hash sha256
+!
+!
+crypto pki certificate chain TP-self-signed-2043905
+ certificate self-signed 01
+!
+!
+memory free low-watermark processor 55011
+!
+!
+spanning-tree mode rapid-pvst
+!
+!         
+!
+!
+!
+!
+!
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Loopback1
+ description Router-ID
+ ip address 172.24.200.1 255.255.255.255
+!
+interface Ethernet0/0
+ description # Trunk to_BRF-Leaf-R1
+ no ip address
+!
+interface Ethernet0/0.10
+ encapsulation dot1Q 1310
+ ip address 172.24.1.2 255.255.255.252
+ no ip redirects
+!
+interface Ethernet0/0.30
+ encapsulation dot1Q 1330
+ ip address 172.24.1.6 255.255.255.252
+ no ip redirects
+!
+interface Ethernet0/1
+ description to_brd_leaf_2
+ ip address 172.24.2.2 255.255.255.252
+ isis network point-to-point 
+ isis metric 40 level-1
+ isis metric 40 level-2
+!         
+interface Ethernet0/2
+ no ip address
+ shutdown
+!
+interface Ethernet0/3
+ no ip address
+ shutdown
+!
+interface Ethernet1/0
+ no ip address
+ shutdown
+!
+interface Ethernet1/1
+ ip address 192.168.100.2 255.255.255.252
+ no ip redirects
+ shutdown
+!
+interface Ethernet1/2
+ no ip address
+ shutdown
+!
+interface Ethernet1/3
+ no ip address
+ shutdown
+!
+router isis UNDERLAY
+ net 49.0002.1720.2420.0001.00
+ router-id Loopback1
+ authentication mode md5 level-1
+ authentication mode md5 level-2
+ authentication key-chain ISIS level-1
+ authentication key-chain ISIS level-2
+ metric-style wide
+ log-adjacency-changes
+ passive-interface default
+!
+router bgp 1111
+ bgp log-neighbor-changes
+ neighbor 172.24.1.1 remote-as 65010
+ neighbor 172.24.1.1 timers 7 21
+ neighbor 172.24.1.1 as-override
+ neighbor 172.24.1.5 remote-as 65010
+ neighbor 172.24.1.5 timers 7 21
+ neighbor 172.24.1.5 as-override
+!
+ip forward-protocol nd
+!
+ip tcp synwait-time 5
+!
+ip http server
+ip http secure-server
+ip route 0.0.0.0 0.0.0.0 Null0 240 tag 100 name FakeDefaultRoute
+ip ssh bulk-mode 131072
+!
+!
+ip prefix-list default_route description Default Route
+!
+route-map bgp_networks_wan permit 10 
+ match ip address prefix-list default_route
+!
+!
+!
+!
+control-plane
+!
+!
+alias exec c conf t
+alias exec sir show ip route
+alias exec srr show run br | s router
+!
+line con 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+line aux 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+line vty 0 4
+ login
+ transport input ssh
+!
+!
+!
+!
+end
 
 ToWAN# 
 ```
