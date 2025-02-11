@@ -1107,7 +1107,7 @@ Route Distinguisher: 10.101.132.1:3    (L3VNI 51010)
 Leaf-R3#
 ```
 
-<details>
+</details>
 
 Собственно все цели достигнуты.
 
