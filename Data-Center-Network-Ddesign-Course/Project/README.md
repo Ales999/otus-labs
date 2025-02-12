@@ -220,8 +220,309 @@ Eth1/2               10.101.24.6
 
 Задачи:
 
-1. Разместите двух "клиентов" в разных VRF в рамках одной фабрики.
-2. Настроите маршрутизацию между клиентами через внешнее устройство (граничный роутер\фаерволл\etc)
+1. Настроить рядом еще одну VxLAN фабрику, и настроить Multi-Site
+2. Настроите маршрутизацию между клиентами через внешнее устройство (граничный роутер\фаерволл\etc) в своей  фабрике, - клиенты между серверами переходят между VRF-ами только в пределах одного сайта.
+
+---
+
+Настройка бордера, лифа и спайна, во втором сайте, ничем не отличается от первого.
+Примечание: на всех VTEP-ах во втором сайте необходимо настроить такой-же как в первом `anycast-gateway-mac`
+
+```text
+fabric forwarding anycast-gateway-mac 0001.0001.0001
+```
+
+Далее настроим взаимодействие двух бордеров из каждого сайта.
+
+Для этого необходимо:
+
+1. Прописать команду глобальную на каждом бордере, который получит роль Border Gateway:
+  `evpn multisite border-gateway xxx`, где `xxx` это уникальнй номер сайта.
+2. Создать отдельный Loopack со своим уникадьным IP, для взаимодействия между сайтами.
+3. Обеспечить доступность всех лупбэков одного бордера на втором.
+4. На интерфейсе в сторону второго сайта необходимо прописать `evpn multisite dci-tracking`
+5. И на бардере, на каждом интерфейсе в сторону своего спайна, - `evpn multisite fabric-tracking`
+
+В ЦОД-1 (Внимание -это приводит к остоновке интерфейса NVE1!):
+
+```text
+C1L-Bgw-R1# conf t
+C1L-Bgw-R1(config)# evpn multisite border-gateway 10
+C1L-Bgw-R1(config)# 
+C1L-Bgw-R1(config)# interface loopback100
+C1L-Bgw-R1(config-if)# description Multi-Site VIP
+C1L-Bgw-R1(config-if)# ip address 10.101.0.1/32
+C1L-Bgw-R1(config-if)# ip router isis UNDERLAY
+C1L-Bgw-R1(config-if)# exit
+C1L-Bgw-R1(config)# 
+C1L-Bgw-R1(config)# interface nve1
+C1L-Bgw-R1(config-if-nve)# multisite border-gateway interface loopback100
+C1L-Bgw-R1(config-if-nve)# exit
+C1L-Bgw-R1(config)# 
+```
+
+В ЦОД-2 (Внимание -это приводит к остоновке интерфейса NVE1!):
+
+```text
+C2L-Bgw-R1# conf t
+C2L-Bgw-R1(config)# evpn multisite border-gateway 20
+C2L-Bgw-R1(config)# 
+C2L-Bgw-R1(config)# interface loopback100
+C2L-Bgw-R1(config-if)# description Multi-Site VIP
+C2L-Bgw-R1(config-if)# ip address 10.102.0.1/32
+C2L-Bgw-R1(config-if)# ip router isis UNDERLAY
+C2L-Bgw-R1(config-if)# exit
+C2L-Bgw-R1(config)# 
+C2L-Bgw-R1(config)# interface nve1
+C2L-Bgw-R1(config-if-nve)# multisite border-gateway interface loopback100
+C2L-Bgw-R1(config-if-nve)# exit
+C2L-Bgw-R1(config)# 
+```
+
+Настроим передачу Loopback-ков, для этого используем всё тот-же eBGP (на примере ЦОД-1):
+
+```text
+C1L-Bgw-R1(config)# interface Ethernet1/4
+C1L-Bgw-R1(config-if)# description ** DCI Interface **
+C1L-Bgw-R1(config-if)# no switchport
+C1L-Bgw-R1(config-if)# mtu 9216
+C1L-Bgw-R1(config-if)# speed 1000
+C1L-Bgw-R1(config-if)# duplex full
+C1L-Bgw-R1(config-if)# no ip redirects
+C1L-Bgw-R1(config-if)# ip address 50.0.0.1/29
+C1L-Bgw-R1(config-if)# ipv6 address use-link-local-only
+C1L-Bgw-R1(config-if)# no ipv6 redirects
+C1L-Bgw-R1(config-if)# isis shutdown
+C1L-Bgw-R1(config-if)# evpn multisite dci-tracking
+C1L-Bgw-R1(config-if)# no shutdown
+C1L-Bgw-R1(config-if)# exit
+C1L-Bgw-R1(config)# 
+C1L-Bgw-R1(config)# router bgp 65010
+C1L-Bgw-R1(config-router)# address-family ipv4 unicast
+C1L-Bgw-R1(config-router-af)# network 10.101.0.1/32
+C1L-Bgw-R1(config-router-af)# network 10.101.11.1/32
+C1L-Bgw-R1(config-router-af)# network 10.101.12.1/32
+C1L-Bgw-R1(config-router-af)# exit
+C1L-Bgw-R1(config-router)# neighbor 50.0.0.3
+C1L-Bgw-R1(config-router-neighbor)# remote-as 65012
+C1L-Bgw-R1(config-router-neighbor)# description COD2-BorderLeaf-1
+C1L-Bgw-R1(config-router-neighbor)# update-source Ethernet1/4
+C1L-Bgw-R1(config-router-neighbor)# timers 7 21
+C1L-Bgw-R1(config-router-neighbor)# address-family ipv4 unicast
+C1L-Bgw-R1(config-router-neighbor-af)# exit
+C1L-Bgw-R1(config-router-neighbor)# exit
+C1L-Bgw-R1(config-router)# exit
+C1L-Bgw-R1(config)# 
+```
+
+Проверяем что все верно настроено, - есть связность и IP лупбэков передаются:
+
+```text
+C1L-Bgw-R1# sh ip bgp summary | b Neighbor
+Neighbor        V    AS    MsgRcvd    MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
+50.0.0.3        4 65012      11539      11538       16    0    0 22:25:33 3         
+C1L-Bgw-R1# 
+C1L-Bgw-R1# sh ip bgp neighbors 50.0.0.3 advertised-routes | b Network
+   Network            Next Hop            Metric     LocPrf     Weight Path
+*>l10.101.0.1/32      0.0.0.0                           100      32768 i
+*>l10.101.11.1/32     0.0.0.0                           100      32768 i
+*>l10.101.12.1/32     0.0.0.0                           100      32768 i
+
+C1L-Bgw-R1# 
+```
+
+Если всё успешно, то настроим уже сам Multi-Site, который нам будет передавать в качестве пятого типа свои маршруты, но видить мы будет только соседний бордер и будем строить свои туннели именно до него, таким образом мы будем полностью изолированы от соседнего сайта(ов).
+
+```text
+C1L-Bgw-R1(config)# 
+C1L-Bgw-R1(config)# router bgp 65010
+C1L-Bgw-R1(config-router)# neighbor 10.102.0.1
+C1L-Bgw-R1(config-router-neighbor)# remote-as 65012
+C1L-Bgw-R1(config-router-neighbor)# description COD2-VTEP-BL1
+C1L-Bgw-R1(config-router-neighbor)# update-source loopback100
+C1L-Bgw-R1(config-router-neighbor)# disable-connected-check
+C1L-Bgw-R1(config-router-neighbor)# peer-type fabric-external
+C1L-Bgw-R1(config-router-neighbor)# address-family l2vpn evpn
+C1L-Bgw-R1(config-router-neighbor-af)# send-community
+C1L-Bgw-R1(config-router-neighbor-af)# send-community extended
+C1L-Bgw-R1(config-router-neighbor-af)# rewrite-evpn-rt-asn
+C1L-Bgw-R1(config-router-neighbor-af)# exit
+C1L-Bgw-R1(config-router-neighbor)# exit
+C1L-Bgw-R1(config-router)# exit
+C1L-Bgw-R1(config)#
+```
+
+Примечание: здесь добавлены два ключевые конструкции `peer-type fabric-external` и `rewrite-evpn-rt-asn`
+ указывающие что это именно внешнее соединение и что в EVPN нам необходимо перезаписывать Route-Target на своё.
+
+Проверим что всё подключилось в 
+
+```text
+C1L-Bgw-R1(config)# sh bgp l2vpn evpn summary | i 10.102.0.1
+
+10.102.0.1      4 65012       1478       1373      836    0    0 04:41:49 24        
+10.102.0.1      E 65012 24         7          3          0          14        
+C1L-Bgw-R1(config)# 
+```
+
+И прверим например маршруты Type-2 которые мы от него получили:
+
+```text
+C1L-Bgw-R1(config)# sh bgp l2vpn evpn neighbors 10.102.0.1 routes | b Network  | i e\[2
+
+*>e[2]:[0]:[0]:[48]:[0cdf.fd27.0000]:[0]:[0.0.0.0]/216
+*>e[2]:[0]:[0]:[48]:[0cdf.fd27.0000]:[32]:[172.24.10.50]/272
+*>e[2]:[0]:[0]:[48]:[0cfc.729d.0000]:[0]:[0.0.0.0]/216
+*>e[2]:[0]:[0]:[48]:[0cfc.729d.0000]:[32]:[172.24.30.50]/272
+*>e[2]:[0]:[0]:[48]:[0c9c.0000.1b08]:[0]:[0.0.0.0]/216
+*>e[2]:[0]:[0]:[48]:[0cdf.fd27.0000]:[0]:[0.0.0.0]/216
+*>e[2]:[0]:[0]:[48]:[0cdf.fd27.0000]:[32]:[172.24.10.50]/272
+*>e[2]:[0]:[0]:[48]:[0c9c.0000.1b08]:[0]:[0.0.0.0]/216
+*>e[2]:[0]:[0]:[48]:[0c9c.0000.1b08]:[0]:[0.0.0.0]/216
+*>e[2]:[0]:[0]:[48]:[0cfc.729d.0000]:[0]:[0.0.0.0]/216
+*>e[2]:[0]:[0]:[48]:[0cfc.729d.0000]:[32]:[172.24.30.50]/272
+*>e[2]:[0]:[0]:[48]:[0c9c.0000.1b08]:[0]:[0.0.0.0]/216
+*>e[2]:[0]:[0]:[48]:[0c9c.0000.1b08]:[0]:[0.0.0.0]/216
+*>e[2]:[0]:[0]:[48]:[0c9c.0000.1b08]:[0]:[0.0.0.0]/216
+*>e[2]:[0]:[0]:[48]:[0cfc.729d.0000]:[32]:[172.24.30.50]/272
+*>e[2]:[0]:[0]:[48]:[0cdf.fd27.0000]:[32]:[172.24.10.50]/272
+C1L-Bgw-R1(config)#
+```
+
+На этом настройка межсайтового взаимодействия закончена, но при подключении аналогичного файрвола во втором сайте наш ждет неприятный сюрприз, - при потытке пропинговать пропинговать хост котороый находится в другом сайте  и в другом VRF, на будут полуоткрые сесси на фарйволе, поскольку пакеты идут **обратно другим** путем:
+
+![первая_проблема_с_файрволами](./images/First_Bad_Path.png)
+
+Это связано с тем для клиента обратный путь приходит из соседнего сайта в виде префикса `/24`, в своем L3VNI, которую соседний файрвол аннонсирует, как мы и настраивали ранее в 8-й лабе.
+
+Первым шагом была предпринята попытка создать отдельный L3VNI для передачи `/32` префиксов полученных в файрволе от хостов, и передачи егоо в свой отдельный VRF, но столкнулся с рядом проблем:
+
+
+1. ![двойной файрвол](./images/bad-1.png)
+2. ![полуоткрытые сессии](./images/bad-2.png)
+
+Решение было найдено в виде асихроной настройки inter-vrf (выполняется на наиболлее нагруженном сайте в плане файрволинга) которая выполняет две функции:
+
+1. Анонсирует, на обычном лифе, префиксы в транзитную VRF
+2. Получает `внешние` IP c `/32` префиксом, с соседнего сайта.
+
+Таким образом удалось добится что меж-VRF трафик который относится к соседнему сайту, на нем-же и орабатывается, при чём в зависимости кто ициатор пакеты, они буду проходить разные пары зон.
+
+![решение](./images/Solution.png)
+
+Вот так выглядит ликинг:
+
+```text
+C1L-Leaf-R3# sh run
+...
+vrf context DEMO
+  vni 51030
+  rd auto
+  address-family ipv4 unicast
+    route-target both auto
+    route-target both auto evpn
+    route-target import 50:11
+    route-target import 50:11 evpn
+    route-target export 101:51030
+    route-target export 101:51030 evpn
+vrf context LABA
+  vni 51010
+  rd auto
+  address-family ipv4 unicast
+    route-target both auto
+    route-target both auto evpn
+    route-target import 50:11
+    route-target import 50:11 evpn
+    route-target export 101:51010
+    route-target export 101:51010 evpn
+vrf context TRANSIT
+  vni 51050
+  rd auto
+  address-family ipv4 unicast
+    route-target import 101:51010
+    route-target import 101:51010 evpn
+    route-target import 101:51030
+    route-target import 101:51030 evpn
+    route-target import 50:11
+    route-target import 50:11 evpn
+    route-target export 50:11
+    route-target export 50:11 evpn
+```
+
+Т.е. мы экспортируем из vrf LABA локальные префиксы, в vrf TRANSIT, а забираем из него-же по RT `50:11`
+При этом маршруты с RT `50:11` получены следующим путем, - на бордере этого-же сайта при получении маршрутов в vrf TRANSIT:
+
+```text
+C1L-Bgw-R1(config)# sh run
+...
+vrf context DEMO
+  vni 51030
+  rd auto
+  address-family ipv4 unicast
+    route-target both auto
+    route-target both auto evpn
+    route-target export 101:30
+    route-target export 101:30 evpn
+vrf context LABA
+  vni 51010
+  rd auto
+  address-family ipv4 unicast
+    route-target both auto
+    route-target both auto evpn
+    route-target export 101:10
+    route-target export 101:10 evpn
+vrf context TRANSIT
+  vni 51050
+  rd auto
+  address-family ipv4 unicast
+    route-target both auto
+    route-target both auto evpn
+    route-target import 101:51010
+    route-target import 101:51010 evpn
+    route-target import 101:51030
+    route-target import 101:51030 evpn
+    route-target export 50:11
+    route-target export 50:11 evpn
+vrf context VRF_VPC_KEEPALIVE
+```
+
+#### Вот что у нас так получилось:
+
+Если мы пингуем из ЦОД-1, с хоста которые находится в vrf LABA, хост во втором ЦОД-е, но который находится в vrf DEMO:
+
+Внутри сайта ЦОД-1, - отправка:
+![до бордера отправка](./images/DC1_to_DC2/1-1.png)
+Внутри сайта ЦОД-1, - получаем:
+![до бордера полчаем](./images/DC1_to_DC2/1-2.png)
+
+Вот тут уже видно что оправлем в `транзите`, а получаем в `лабе`
+
+Далее, между -сайтов, отправка:
+![межсайт - отправка](./images/DC1_to_DC2/2-1.png)
+Получение:
+![межсайт - получение](./images/DC1_to_DC2/2-2.png)
+
+Мы все так-же отпрвляем в `транзите`, а получаем в `лабе`.
+
+Теперь посмотрим как видит файрвол:
+
+![dc1-dc2-fw](./images/DC1_to_DC2/3.png)
+
+Вот тут сразу видно где происходит переход из `транзита` в `демо` где уже и нахрдится нужный нам хост, а наличии признака в ZBF `Established` говорит нам о том что пакеты идут обратно через него же.
+
+Файрвол во втором сайте:
+![От файрвола до хоста](./images/DC1_to_DC2/4-1.png)
+Обратно:
+![К фарволу от хоста](./images/DC1_to_DC2/4-2.png)
+
+Как мы видим тут без сюрпризов, все идет в предедах своего `vrf DEMO`
+
+
+А вот если инициатор
+
+
+
+
 
 ---
 
@@ -3007,6 +3308,8 @@ router bgp 1111
  bgp log-neighbor-changes
  neighbor 1.10.10.1 remote-as 1020
  neighbor 1.10.10.1 description FakeWAN
+ neighbor 1.10.10.1 update-source Ethernet1/0
+ neighbor 1.10.10.1 remove-private-as all replace-as
  neighbor 172.24.1.1 remote-as 65010
  neighbor 172.24.1.1 description BRD_Leaf_VRF_LABA
  neighbor 172.24.1.1 timers 7 21
@@ -3340,6 +3643,8 @@ router bgp 2222
  bgp log-neighbor-changes
  neighbor 1.20.20.1 remote-as 1020
  neighbor 1.20.20.1 description FakeWAN
+ neighbor 1.10.10.1 update-source Ethernet1/0
+ neighbor 1.10.10.1 remove-private-as all replace-as
  neighbor 1.20.20.1 shutdown
  neighbor 172.24.2.1 remote-as 65012
  neighbor 172.24.2.1 timers 7 21
