@@ -1295,8 +1295,8 @@ Leaf-R2#
 C1L-Leaf-R3# sh run
 
 !Command: show running-config
-!Running configuration last done at: Wed Feb 12 11:34:18 2025
-!Time: Wed Feb 12 12:12:52 2025
+!Running configuration last done at: Fri Feb 14 13:54:22 2025
+!Time: Fri Feb 14 14:07:38 2025
 
 version 10.3(5) Bios:version  
 hostname C1L-Leaf-R3
@@ -1328,11 +1328,13 @@ rmon event 4 log trap public description WARNING(4) owner PMON@WARNING
 rmon event 5 log trap public description INFORMATION(5) owner PMON@INFO
 
 fabric forwarding anycast-gateway-mac 0001.0001.0001
-vlan 1,10,30,1010,1030,1050
+vlan 1,10,30,50,1010,1030,1050
 vlan 10
   vn-segment 10000010
 vlan 30
   vn-segment 10000030
+vlan 50
+  vn-segment 10000050
 vlan 1010
   vn-segment 51010
 vlan 1030
@@ -1340,13 +1342,28 @@ vlan 1030
 vlan 1050
   vn-segment 51050
 
+ip prefix-list bgp_only_host description Allow only /32 prefixses
+ip prefix-list bgp_only_host seq 10 permit 0.0.0.0/0 eq 32 
+ip prefix-list only_32_prefix description Allow only client host ip as /32 prefix
+ip prefix-list only_32_prefix seq 10 permit 0.0.0.0/0 eq 32 
 ip as-path access-list BGP_ONLY_INTERNAL seq 1 permit "^$"
 ip as-path access-list bgpAsRemote seq 10 deny "^$"
 ip as-path access-list blockLocalFw seq 10 permit "^1111_"
+ip as-path access-list only_extenal_as seq 10 permit "_2222$"
 route-map RM_PERMIT_IPv4 permit 10
 route-map bgpLocal deny 10
   match evpn route-type 5 
 route-map bgpLocal permit 100
+route-map only_32_prefix_external permit 10
+  match as-path only_extenal_as 
+  match ip address prefix-list only_32_prefix 
+  set local-preference 200
+route-map only_32_prefix_to_transit permit 10
+  match ip address prefix-list only_32_prefix 
+route-map servers_prefix32_to_transit permit 10
+  match ip address prefix-list bgp_only_host 
+route-map vrf_laba_to_vrf_transit permit 10
+  match ip address prefix-list bgp_only_host 
 key chain ISIS
   key 1
     key-string 7 070c285f4d064b0916100a
@@ -1356,10 +1373,6 @@ vrf context DEMO
   address-family ipv4 unicast
     route-target both auto
     route-target both auto evpn
-    route-target import 50:11
-    route-target import 50:11 evpn
-    route-target export 101:51030
-    route-target export 101:51030 evpn
 vrf context LABA
   vni 51010
   rd auto
@@ -1368,20 +1381,18 @@ vrf context LABA
     route-target both auto evpn
     route-target import 50:11
     route-target import 50:11 evpn
-    route-target export 101:51010
-    route-target export 101:51010 evpn
+    import map only_32_prefix_external
 vrf context TRANSIT
   vni 51050
   rd auto
   address-family ipv4 unicast
-    route-target import 101:51010
-    route-target import 101:51010 evpn
-    route-target import 101:51030
-    route-target import 101:51030 evpn
-    route-target import 50:11
-    route-target import 50:11 evpn
+    route-target both auto
+    route-target both auto evpn
+    route-target import 50:12
+    route-target import 50:12 evpn
     route-target export 50:11
     route-target export 50:11 evpn
+    import map only_32_prefix_to_transit
 vrf context management
 hardware profile tcam resource template LEAF_TCAM_CARVE ref-template nfe
   racl 256
@@ -1411,7 +1422,7 @@ interface Vlan30
 interface Vlan1010
   description * L3VNI VRF LABA *
   no shutdown
-  mtu 9000
+  mtu 9216
   vrf member LABA
   no ip redirects
   ip forward
@@ -1420,7 +1431,7 @@ interface Vlan1010
 interface Vlan1030
   description * L3VNI VRF DEMO *
   no shutdown
-  mtu 9000
+  mtu 9216
   vrf member DEMO
   no ip redirects
   ip forward
@@ -1429,7 +1440,7 @@ interface Vlan1030
 interface Vlan1050
   description L3VNI for vrf TRANSIT
   no shutdown
-  mtu 9000
+  mtu 9216
   vrf member TRANSIT
   no ip redirects
   ip forward
@@ -1439,15 +1450,14 @@ interface nve1
   no shutdown
   host-reachability protocol bgp
   source-interface loopback2
+  global suppress-arp
+  global ingress-replication protocol bgp
   member vni 51010 associate-vrf
   member vni 51030 associate-vrf
   member vni 51050 associate-vrf
   member vni 10000010
-    suppress-arp
-    ingress-replication protocol bgp
   member vni 10000030
-    suppress-arp
-    ingress-replication protocol bgp
+  member vni 10000050
 
 interface Ethernet1/1
   description to_spine_1
@@ -1483,10 +1493,12 @@ interface Ethernet1/4
 interface Ethernet1/5
   description *** to_HOST-R3 ***
   switchport access vlan 10
+  mtu 9216
 
 interface Ethernet1/6
   description *** to_HOST-R31 ***
   switchport access vlan 30
+  mtu 9216
 
 interface Ethernet1/7
   shutdown
@@ -1619,6 +1631,11 @@ interface loopback2
   description # VTEP-ID
   ip address 10.101.132.1/32
   ip router isis UNDERLAY
+
+interface loopback50
+  description Test for vrf TRANSIT
+  vrf member TRANSIT
+  ip address 101.102.4.4/32
 cli alias name wr copy run start
 cli alias name c conf term
 cli alias name sir show ip route
@@ -1669,10 +1686,11 @@ router bgp 65010
   vrf TRANSIT
     address-family ipv4 unicast
       redistribute hmm route-map RM_PERMIT_IPv4
+      redistribute direct route-map RM_PERMIT_IPv4
 
 
 
-C1L-Leaf-R3# 
+C1L-Leaf-R3#
 ```
 
 </details>
@@ -2656,8 +2674,8 @@ Spine-R2#
 C1L-Bgw-R1# sh run
 
 !Command: show running-config
-!Running configuration last done at: Wed Feb 12 12:42:19 2025
-!Time: Wed Feb 12 13:12:35 2025
+!Running configuration last done at: Fri Feb 14 13:56:39 2025
+!Time: Fri Feb 14 14:09:12 2025
 
 version 10.3(5) Bios:version  
 hostname C1L-Bgw-R1
@@ -2689,7 +2707,7 @@ rmon event 3 log trap public description ERROR(3) owner PMON@ERROR
 rmon event 4 log trap public description WARNING(4) owner PMON@WARNING
 rmon event 5 log trap public description INFORMATION(5) owner PMON@INFO
 
-fabric forwarding anycast-gateway-mac 0001.0001.0000
+fabric forwarding anycast-gateway-mac 0001.0001.0001
 vlan 1,10,20,30,50,60,1010,1030,1050,1060,1310,1330,1350
 vlan 10
   vn-segment 10000010
@@ -2719,7 +2737,9 @@ vlan 1350
 spanning-tree vlan 1-3967 priority 4096
 ip prefix-list bgp_only_host seq 10 permit 0.0.0.0/0 eq 32 
 ip prefix-list bgp_only_net seq 10 deny 0.0.0.0/0 eq 32 
-ip prefix-list bgp_only_net seq 20 permit 0.0.0.0/0 le 32 
+ip prefix-list bgp_only_net seq 20 permit 0.0.0.0/0 le 31 
+ip prefix-list only_32_prefix description Allow only client host ip as /32 prefix
+ip prefix-list only_32_prefix seq 10 permit 0.0.0.0/0 eq 32 
 ip prefix-list outbound-no-host description Allow only CIDR prefix send to router
 ip prefix-list outbound-no-host seq 10 deny 0.0.0.0/0 eq 32 
 ip prefix-list outbound-no-host seq 20 permit 0.0.0.0/0 le 32 
@@ -2729,6 +2749,10 @@ ip as-path access-list bgp_trans_out seq 10 permit "_2222$"
 route-map BGP_LOCAL_PREF permit 10
   set local-preference 100
 route-map RM-BGP-DIRECT permit 10
+route-map bgp_trans_pref permit 10
+  set local-preference 50
+route-map only_32_prefix_to_transit permit 10
+  match ip address prefix-list only_32_prefix 
 key chain ISIS
   key 1
     key-string 7 070c285f4d064b0916100a
@@ -2747,20 +2771,21 @@ vrf context LABA
   address-family ipv4 unicast
     route-target both auto
     route-target both auto evpn
-    route-target export 101:10
-    route-target export 101:10 evpn
 vrf context TRANSIT
   vni 51050
   rd auto
   address-family ipv4 unicast
     route-target both auto
     route-target both auto evpn
-    route-target import 101:51010
-    route-target import 101:51010 evpn
-    route-target import 101:51030
-    route-target import 101:51030 evpn
+    route-target import 101:10
+    route-target import 101:10 evpn
+    route-target import 101:30
+    route-target import 101:30 evpn
+    route-target import 50:12
+    route-target import 50:12 evpn
     route-target export 50:11
     route-target export 50:11 evpn
+    import map only_32_prefix_to_transit
 vrf context VRF_VPC_KEEPALIVE
   address-family ipv4 unicast
 vrf context management
@@ -2773,10 +2798,14 @@ hardware profile tcam resource service-template LEAF_TCAM_CARVE
 
 interface Vlan1
 
+interface Vlan50
+  vrf member TRANSIT
+  ip address 10.105.1.2/24
+
 interface Vlan1010
   description L3VNI for vrf LABA
   no shutdown
-  mtu 9000
+  mtu 9216
   vrf member LABA
   ip forward
   ipv6 forward
@@ -2784,7 +2813,7 @@ interface Vlan1010
 interface Vlan1030
   description L3VNI for vrf DEMO
   no shutdown
-  mtu 9000
+  mtu 9216
   vrf member DEMO
   ip forward
   ipv6 forward
@@ -2792,7 +2821,7 @@ interface Vlan1030
 interface Vlan1050
   description L3VNI for vrf TRANSIT
   no shutdown
-  mtu 9000
+  mtu 9216
   vrf member TRANSIT
   ip forward
   ipv6 forward
@@ -2828,7 +2857,10 @@ interface nve1
   member vni 10000010
     multisite ingress-replication
   member vni 10000020
+    multisite ingress-replication
   member vni 10000030
+    multisite ingress-replication
+  member vni 10000050
     multisite ingress-replication
 
 interface Ethernet1/1
@@ -2880,7 +2912,7 @@ interface Ethernet1/8
 interface Ethernet1/9
   description to_wan
   switchport mode trunk
-  switchport trunk allowed vlan 1310,1330,1350
+  switchport trunk allowed vlan 50,1310,1330,1350
   speed 1000
   duplex full
 
@@ -3055,10 +3087,12 @@ router bgp 65010
     network 10.101.12.1/32
   template peer Firewall
     remote-as 1111
+    description Router as firewall
     timers 7 21
     address-family ipv4 unicast
       send-community
       send-community extended
+    address-family l2vpn evpn
   template peer SPINES
     remote-as 65010
     update-source loopback2
@@ -3096,6 +3130,7 @@ router bgp 65010
       description COD-1-Router
       address-family ipv4 unicast
         prefix-list bgp_only_net in
+        prefix-list bgp_only_net out
         filter-list BGP_ONLY_INTERNAL out
         route-map BGP_LOCAL_PREF in
   vrf LABA
@@ -3107,22 +3142,25 @@ router bgp 65010
       description COD-1-Router
       address-family ipv4 unicast
         prefix-list bgp_only_net in
+        no prefix-list bgp_only_net out
         filter-list BGP_ONLY_INTERNAL out
         route-map BGP_LOCAL_PREF in
   vrf TRANSIT
     router-id 172.24.1.49
     address-family ipv4 unicast
-      redistribute hmm route-map RM-BGP-DIRECT
+      redistribute direct route-map RM-BGP-DIRECT
     neighbor 172.24.1.50
       inherit peer Firewall
       address-family ipv4 unicast
+        no allowas-in 3
         prefix-list bgp_only_host in
+        no prefix-list bgp_only_net out
         filter-list bgp_trans_in in
-        filter-list bgp_trans_out out
+        filter-list BGP_ONLY_INTERNAL out
 
 
 
-C1L-Bgw-R1# 
+C1L-Bgw-R1#
 ```
 
 </details>
@@ -3134,9 +3172,9 @@ C1L-Bgw-R1#
 Cod1-FW-R1#sh run br
 Building configuration...
 
-Current configuration : 5564 bytes
+Current configuration : 6087 bytes
 !
-! Last configuration change at 12:56:25 PRM Wed Feb 12 2025
+! Last configuration change at 02:01:28 PRM Fri Feb 14 2025
 !
 version 15.7
 service timestamps debug datetime msec
@@ -3148,6 +3186,11 @@ hostname Cod1-FW-R1
 boot-start-marker
 boot-end-marker
 !
+!
+vrf definition TRANSIT
+ !
+ address-family ipv4
+ exit-address-family
 !
 logging console errors
 !
@@ -3174,12 +3217,12 @@ no ip icmp rate-limit unreachable
 !
 !
 !
-!
-!
-
-
-!
 !         
+!
+
+
+!
+!
 !
 !
 no ip domain lookup
@@ -3220,6 +3263,16 @@ policy-map type inspect DEMO_TO_LABA
   inspect 
  class class-default
   drop log
+policy-map type inspect DEMO_TO_LABA_PMAP
+ class type inspect ALLVRF_CMAP
+  inspect 
+ class class-default
+  drop log
+policy-map type inspect LABA_TO_DEMO_PMAP
+ class type inspect ALLVRF_CMAP
+  inspect 
+ class class-default
+  drop log
 policy-map type inspect TRANSIT_PMAP
  class type inspect ALLVRF_CMAP
   inspect 
@@ -3245,9 +3298,9 @@ zone security TRANSIT
 zone security WAN
  description Internet
 zone-pair security LABA_TO_DEMO source LABA destination DEMO
- service-policy type inspect LABA_TO_DEMO
+ service-policy type inspect LABA_TO_DEMO_PMAP
 zone-pair security DEMO_TO_LABA source DEMO destination LABA
- service-policy type inspect DEMO_TO_LABA
+ service-policy type inspect DEMO_TO_LABA_PMAP
 zone-pair security LABA_TO_TRANSIT source LABA destination TRANSIT
  service-policy type inspect TRANSIT_PMAP
 zone-pair security DEMO_TO_TRANSIT source DEMO destination TRANSIT
@@ -3271,7 +3324,7 @@ zone-pair security DEMO_TO_WAN source DEMO destination WAN
 !
 !
 !
-!         
+!
 !
 interface Loopback1
  description Router-ID
@@ -3302,7 +3355,7 @@ interface Ethernet0/0.50
 !
 interface Ethernet0/1
  no ip address
- shutdown
+ shutdown 
  duplex auto
 !
 interface Ethernet0/2
@@ -3325,7 +3378,7 @@ interface Ethernet1/1
  no ip address
  shutdown
  duplex auto
-!
+!         
 interface Ethernet1/2
  no ip address
  shutdown
@@ -3342,6 +3395,7 @@ router bgp 1111
  neighbor 1.10.10.1 description FakeWAN
  neighbor 1.10.10.1 update-source Ethernet1/0
  neighbor 1.10.10.1 remove-private-as all replace-as
+ neighbor 1.10.10.1 prefix-list bgp_only_default in
  neighbor 172.24.1.1 remote-as 65010
  neighbor 172.24.1.1 description BRD_Leaf_VRF_LABA
  neighbor 172.24.1.1 timers 7 21
@@ -3376,6 +3430,8 @@ ip access-list extended TRACE
  permit icmp any any port-unreachable
  permit icmp any any ttl-exceeded
 !
+!
+ip prefix-list bgp_only_default seq 10 permit 0.0.0.0/0
 ipv6 ioam timestamp
 !
 !
@@ -3421,7 +3477,7 @@ line vty 0 4
 !
 end
 
-Cod1-FW-R1#  
+Cod1-FW-R1#
 ```
 
 ---
@@ -3435,9 +3491,9 @@ Cod1-FW-R1#
 Cod2-FW-R1#sh run br
 Building configuration...
 
-Current configuration : 6563 bytes
+Current configuration : 6702 bytes
 !
-! Last configuration change at 13:19:32 PRM Wed Feb 12 2025
+! Last configuration change at 01:17:41 PRM Fri Feb 14 2025
 !
 version 15.7
 service timestamps debug datetime msec
@@ -3517,17 +3573,27 @@ class-map type inspect match-all ALLVRF_CMAP
 class-map type inspect match-all ICMP_TRACE_CMAP
  match access-group name ICMP-TRACE
 !
-policy-map type inspect DEMO_TO_LABA
+policy-map type inspect DEMO_TO_TRANSIT_PMAP
  class type inspect ALLVRF_CMAP
   inspect 
  class class-default
   drop log
-policy-map type inspect VAGON_PMAP
+policy-map type inspect DEMO_TO_LABA_PMAP
  class type inspect ALLVRF_CMAP
   inspect 
  class class-default
   drop log
-policy-map type inspect TRANSIT_PMAP
+policy-map type inspect TRANSIT_TO_DEMO_PMAP
+ class type inspect ALLVRF_CMAP
+  inspect 
+ class class-default
+  drop log
+policy-map type inspect LABA_TO_DEMO_PMAP
+ class type inspect ALLVRF_CMAP
+  inspect 
+ class class-default
+  drop log
+policy-map type inspect DEMO_TRANSIT_PMAP
  class type inspect ALLVRF_CMAP
   inspect 
  class class-default
@@ -3537,7 +3603,12 @@ policy-map type inspect WAN_PMAP
   inspect 
  class class-default
   drop
-policy-map type inspect LABA_TO_DEMO
+policy-map type inspect TRANSIT_TO_LABA_PMAP
+ class type inspect ALLVRF_CMAP
+  inspect 
+ class class-default
+  drop log
+policy-map type inspect LABA_TRANSIT_PMAP
  class type inspect ALLVRF_CMAP
   inspect 
  class class-default
@@ -3547,32 +3618,22 @@ zone security LABA
  description For VRF LABA
 zone security DEMO
  description For VRF DEMO
-zone security VAGON
- description For VRF VAGON
 zone security TRANSIT
  description For VRF TRANSIT
 zone security WAN
  description Internet
 zone-pair security LABA_TO_DEMO source LABA destination DEMO
- service-policy type inspect LABA_TO_DEMO
+ service-policy type inspect LABA_TO_DEMO_PMAP
 zone-pair security DEMO_TO_LABA source DEMO destination LABA
- service-policy type inspect DEMO_TO_LABA
-zone-pair security VAGON_TO_LABA source VAGON destination LABA
- service-policy type inspect VAGON_PMAP
-zone-pair security VAGON_TO_DEMO source VAGON destination DEMO
- service-policy type inspect VAGON_PMAP
-zone-pair security DEMO_TO_VAGON source DEMO destination VAGON
- service-policy type inspect VAGON_PMAP
-zone-pair security LABA_TO_VAGON source LABA destination VAGON
- service-policy type inspect VAGON_PMAP
+ service-policy type inspect DEMO_TO_LABA_PMAP
 zone-pair security LABA_TO_TRANSIT source LABA destination TRANSIT
- service-policy type inspect TRANSIT_PMAP
+ service-policy type inspect LABA_TRANSIT_PMAP
 zone-pair security TRANSIT_TO_LABA source TRANSIT destination LABA
- service-policy type inspect TRANSIT_PMAP
+ service-policy type inspect TRANSIT_TO_LABA_PMAP
 zone-pair security DEMO_TO_TRANSIT source DEMO destination TRANSIT
- service-policy type inspect TRANSIT_PMAP
+ service-policy type inspect DEMO_TRANSIT_PMAP
 zone-pair security TRANSIT_TO_DEMO source TRANSIT destination DEMO
- service-policy type inspect TRANSIT_PMAP
+ service-policy type inspect TRANSIT_TO_DEMO_PMAP
 zone-pair security LABA_TO_WAN source LABA destination WAN
  service-policy type inspect WAN_PMAP
 zone-pair security DEMO_TO_WAN source DEMO destination WAN
@@ -3675,9 +3736,9 @@ router bgp 2222
  bgp log-neighbor-changes
  neighbor 1.20.20.1 remote-as 1020
  neighbor 1.20.20.1 description FakeWAN
- neighbor 1.10.10.1 update-source Ethernet1/0
- neighbor 1.10.10.1 remove-private-as all replace-as
- neighbor 1.20.20.1 shutdown
+ neighbor 1.20.20.1 update-source Ethernet1/0
+ neighbor 1.20.20.1 remove-private-as all replace-as
+ neighbor 1.20.20.1 prefix-list bgp_only_default in
  neighbor 172.24.2.1 remote-as 65012
  neighbor 172.24.2.1 timers 7 21
  neighbor 172.24.2.1 send-community both
@@ -3712,7 +3773,9 @@ ip access-list extended ICMP-TRACE
 ip access-list extended TRACE
  permit icmp any any port-unreachable
  permit icmp any any ttl-exceeded
-!         
+!
+!
+ip prefix-list bgp_only_default seq 10 permit 0.0.0.0/0
 ipv6 ioam timestamp
 !
 !
@@ -3757,7 +3820,7 @@ line vty 0 4
 !
 !
 end
-          
+
 Cod2-FW-R1#
 ```
 
@@ -3767,15 +3830,15 @@ Cod2-FW-R1#
 <summary>C2L-Bgw-R1</summary>
 
 ```text
-C2L-BGW-R1# sh run
+C2L-Bgw-R1# sh run
 
 !Command: show running-config
-!Running configuration last done at: Wed Feb 12 11:48:32 2025
-!Time: Wed Feb 12 13:20:20 2025
+!Running configuration last done at: Fri Feb 14 12:41:31 2025
+!Time: Fri Feb 14 14:13:46 2025
 
 version 10.3(5) Bios:version  
-hostname C2L-BGW-R1
-vdc C2L-BGW-R1 id 1
+hostname C2L-Bgw-R1
+vdc C2L-Bgw-R1 id 1
   limit-resource vlan minimum 16 maximum 4094
   limit-resource vrf minimum 2 maximum 4096
   limit-resource port-channel minimum 0 maximum 511
@@ -3804,10 +3867,12 @@ rmon event 3 log trap public description ERROR(3) owner PMON@ERROR
 rmon event 4 log trap public description WARNING(4) owner PMON@WARNING
 rmon event 5 log trap public description INFORMATION(5) owner PMON@INFO
 
-fabric forwarding anycast-gateway-mac 0001.0001.0000
-vlan 1,10,30,50,60,1010,1030,1050,1310,1330,1350
+fabric forwarding anycast-gateway-mac 0001.0001.0001
+vlan 1,10,20,30,50,60,1010,1030,1050,1310,1330,1350
 vlan 10
   vn-segment 10000010
+vlan 20
+  vn-segment 10000020
 vlan 30
   vn-segment 10000030
 vlan 50
@@ -3830,7 +3895,7 @@ vlan 1350
 ip prefix-list bgp_only_host seq 10 permit 0.0.0.0/0 eq 32 
 ip prefix-list bgp_only_net description Allow only CIDR prefix
 ip prefix-list bgp_only_net seq 10 deny 0.0.0.0/0 eq 32 
-ip prefix-list bgp_only_net seq 20 permit 0.0.0.0/0 le 32 
+ip prefix-list bgp_only_net seq 20 permit 0.0.0.0/0 le 31 
 ip prefix-list outbound-no-host description Allow only CIDR prefix send to router
 ip prefix-list outbound-no-host seq 10 deny 0.0.0.0/0 eq 32 
 ip prefix-list outbound-no-host seq 20 permit 0.0.0.0/0 le 32 
@@ -3865,12 +3930,10 @@ vrf context TRANSIT
   vni 51050
   rd auto
   address-family ipv4 unicast
-    route-target both auto
-    route-target both auto evpn
-    route-target import 102:51010
     route-target import 102:51010 evpn
-    route-target import 102:51030
     route-target import 102:51030 evpn
+    route-target import 50:11
+    route-target import 50:11 evpn
     route-target export 50:12
     route-target export 50:12 evpn
 vrf context management
@@ -3883,10 +3946,14 @@ hardware profile tcam resource service-template LEAF_TCAM_CARVE
 
 interface Vlan1
 
+interface Vlan50
+  vrf member TRANSIT
+  ip address 10.105.1.2/24
+
 interface Vlan1010
   description L3VNI for vrf LABA
   no shutdown
-  mtu 9000
+  mtu 9216
   vrf member LABA
   ip forward
   ipv6 forward
@@ -3894,7 +3961,7 @@ interface Vlan1010
 interface Vlan1030
   description L3VNI for vrf DEMO
   no shutdown
-  mtu 9000
+  mtu 9216
   vrf member DEMO
   ip forward
   ipv6 forward
@@ -3902,7 +3969,7 @@ interface Vlan1030
 interface Vlan1050
   description L3VNI for vrf TRANSIT
   no shutdown
-  mtu 9000
+  mtu 9216
   vrf member TRANSIT
   ip forward
   ipv6 forward
@@ -3910,6 +3977,7 @@ interface Vlan1050
 interface Vlan1310
   description Tranfer VL10 and VL20 to Router
   no shutdown
+  mtu 9100
   vrf member LABA
   ip address 172.24.2.1/30
   ipv6 address use-link-local-only
@@ -3917,6 +3985,7 @@ interface Vlan1310
 interface Vlan1330
   description Tranfer VL30 to Router
   no shutdown
+  mtu 9100
   vrf member DEMO
   ip address 172.24.2.5/30
   ipv6 address use-link-local-only
@@ -3924,6 +3993,7 @@ interface Vlan1330
 interface Vlan1350
   description # VL50 to Router
   no shutdown
+  mtu 9100
   vrf member TRANSIT
   ip address 172.24.2.49/30
   ipv6 address use-link-local-only
@@ -3940,7 +4010,11 @@ interface nve1
   member vni 51050 associate-vrf
   member vni 10000010
     multisite ingress-replication
+  member vni 10000020
+    multisite ingress-replication
   member vni 10000030
+    multisite ingress-replication
+  member vni 10000050
     multisite ingress-replication
 
 interface Ethernet1/1
@@ -4122,7 +4196,7 @@ interface loopback2
 interface loopback50
   description test vrf TRANSIT
   vrf member TRANSIT
-  ip address 10.102.8.8/32
+  ip address 10.102.8.10/32
 
 interface loopback100
   description Multi-Site VIP
@@ -4211,6 +4285,7 @@ router bgp 65012
   vrf TRANSIT
     router-id 172.24.2.49
     address-family ipv4 unicast
+      redistribute hmm route-map RM-BGP-DIRECT
       redistribute direct route-map RM-BGP-DIRECT
     neighbor 172.24.2.50
       inherit peer Firewall
@@ -4221,7 +4296,7 @@ router bgp 65012
 
 
 
-C2L-BGW-R1#
+C2L-Bgw-R1#
 ```
 
 </details>
@@ -4503,8 +4578,8 @@ C2L-Spine-R1#
 C2L-Leaf-R1# sh run
 
 !Command: show running-config
-!Running configuration last done at: Wed Feb 12 11:52:18 2025
-!Time: Wed Feb 12 13:22:18 2025
+!No configuration change since last restart
+!Time: Fri Feb 14 14:54:18 2025
 
 version 10.3(5) Bios:version  
 hostname C2L-Leaf-R1
@@ -4617,7 +4692,7 @@ interface Vlan30
 interface Vlan1010
   description L3VNI for vrf LABA
   no shutdown
-  mtu 9000
+  mtu 9216
   vrf member LABA
   ip forward
   ipv6 forward
@@ -4625,7 +4700,7 @@ interface Vlan1010
 interface Vlan1030
   description L3VNI for vrf DEMO
   no shutdown
-  mtu 9000
+  mtu 9216
   vrf member DEMO
   ip forward
   ipv6 forward
@@ -4633,7 +4708,7 @@ interface Vlan1030
 interface Vlan1050
   description L3VNI for vrf TRANSIT
   no shutdown
-  mtu 9000
+  mtu 9216
   vrf member TRANSIT
   ip forward
   ipv6 forward
@@ -4681,12 +4756,14 @@ interface Ethernet1/4
 interface Ethernet1/5
   description to_COD2-HOST1
   switchport access vlan 10
+  mtu 9216
   speed 1000
   duplex full
 
 interface Ethernet1/6
   description to_COD2-HOST2
   switchport access vlan 30
+  mtu 9216
   speed 1000
   duplex full
 
@@ -4871,7 +4948,7 @@ router bgp 65012
 
 
 
-C2L-Leaf-R1# 
+C2L-Leaf-R1#
 ```
 
 </details>
