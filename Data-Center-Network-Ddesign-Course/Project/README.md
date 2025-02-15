@@ -1295,8 +1295,8 @@ Leaf-R2#
 C1L-Leaf-R3# sh run
 
 !Command: show running-config
-!Running configuration last done at: Fri Feb 14 13:54:22 2025
-!Time: Fri Feb 14 14:07:38 2025
+!Running configuration last done at: Sat Feb 15 04:40:15 2025
+!Time: Sat Feb 15 05:20:03 2025
 
 version 10.3(5) Bios:version  
 hostname C1L-Leaf-R3
@@ -1379,9 +1379,6 @@ vrf context LABA
   address-family ipv4 unicast
     route-target both auto
     route-target both auto evpn
-    route-target import 50:11
-    route-target import 50:11 evpn
-    import map only_32_prefix_external
 vrf context TRANSIT
   vni 51050
   rd auto
@@ -1439,12 +1436,7 @@ interface Vlan1030
 
 interface Vlan1050
   description L3VNI for vrf TRANSIT
-  no shutdown
   mtu 9216
-  vrf member TRANSIT
-  no ip redirects
-  ip forward
-  no ipv6 redirects
 
 interface nve1
   no shutdown
@@ -1454,10 +1446,8 @@ interface nve1
   global ingress-replication protocol bgp
   member vni 51010 associate-vrf
   member vni 51030 associate-vrf
-  member vni 51050 associate-vrf
   member vni 10000010
   member vni 10000030
-  member vni 10000050
 
 interface Ethernet1/1
   description to_spine_1
@@ -2674,8 +2664,8 @@ Spine-R2#
 C1L-Bgw-R1# sh run
 
 !Command: show running-config
-!Running configuration last done at: Fri Feb 14 13:56:39 2025
-!Time: Fri Feb 14 14:09:12 2025
+!Running configuration last done at: Sat Feb 15 04:47:35 2025
+!Time: Sat Feb 15 05:22:23 2025
 
 version 10.3(5) Bios:version  
 hostname C1L-Bgw-R1
@@ -2742,17 +2732,27 @@ ip prefix-list only_32_prefix description Allow only client host ip as /32 prefi
 ip prefix-list only_32_prefix seq 10 permit 0.0.0.0/0 eq 32 
 ip prefix-list outbound-no-host description Allow only CIDR prefix send to router
 ip prefix-list outbound-no-host seq 10 deny 0.0.0.0/0 eq 32 
-ip prefix-list outbound-no-host seq 20 permit 0.0.0.0/0 le 32 
+ip prefix-list outbound-no-host seq 20 permit 0.0.0.0/0 le 31 
 ip as-path access-list BGP_ONLY_INTERNAL seq 1 permit "^$"
 ip as-path access-list bgp_trans_in seq 10 permit "_1111$"
 ip as-path access-list bgp_trans_out seq 10 permit "_2222$"
+ip as-path access-list only_extenal_as seq 10 permit "_2222$"
+route-map BGP_EXT_PREF permit 10
+  set local-preference 50
 route-map BGP_LOCAL_PREF permit 10
   set local-preference 100
 route-map RM-BGP-DIRECT permit 10
 route-map bgp_trans_pref permit 10
   set local-preference 50
+route-map only_32_prefix_external permit 10
+  match as-path only_extenal_as 
+  match ip address prefix-list only_32_prefix 
+route-map only_32_prefix_external deny 20
+  match as-path only_extenal_as 
+route-map only_32_prefix_external permit 50
 route-map only_32_prefix_to_transit permit 10
   match ip address prefix-list only_32_prefix 
+  match evpn route-type 5 
 key chain ISIS
   key 1
     key-string 7 070c285f4d064b0916100a
@@ -2763,8 +2763,6 @@ vrf context DEMO
   address-family ipv4 unicast
     route-target both auto
     route-target both auto evpn
-    route-target export 101:30
-    route-target export 101:30 evpn
 vrf context LABA
   vni 51010
   rd auto
@@ -2777,14 +2775,10 @@ vrf context TRANSIT
   address-family ipv4 unicast
     route-target both auto
     route-target both auto evpn
-    route-target import 101:10
-    route-target import 101:10 evpn
-    route-target import 101:30
-    route-target import 101:30 evpn
-    route-target import 50:12
-    route-target import 50:12 evpn
-    route-target export 50:11
-    route-target export 50:11 evpn
+    route-target import 65010:51010
+    route-target import 65010:51010 evpn
+    route-target import 65010:51030
+    route-target import 65010:51030 evpn
     import map only_32_prefix_to_transit
 vrf context VRF_VPC_KEEPALIVE
   address-family ipv4 unicast
@@ -2797,10 +2791,6 @@ hardware profile tcam resource service-template LEAF_TCAM_CARVE
 
 
 interface Vlan1
-
-interface Vlan50
-  vrf member TRANSIT
-  ip address 10.105.1.2/24
 
 interface Vlan1010
   description L3VNI for vrf LABA
@@ -2860,8 +2850,6 @@ interface nve1
     multisite ingress-replication
   member vni 10000030
     multisite ingress-replication
-  member vni 10000050
-    multisite ingress-replication
 
 interface Ethernet1/1
   description ** Fabric Internal to_Spine-R1 **
@@ -2912,7 +2900,8 @@ interface Ethernet1/8
 interface Ethernet1/9
   description to_wan
   switchport mode trunk
-  switchport trunk allowed vlan 50,1310,1330,1350
+  switchport trunk allowed vlan 1310,1330,1350
+  mtu 9216
   speed 1000
   duplex full
 
@@ -3048,7 +3037,7 @@ interface loopback2
 interface loopback50
   description * VRF TRANSIT *
   vrf member TRANSIT
-  ip address 10.101.8.8/32
+  ip address 10.101.8.9/32
 
 interface loopback100
   description Multi-Site VIP
@@ -3130,7 +3119,7 @@ router bgp 65010
       description COD-1-Router
       address-family ipv4 unicast
         prefix-list bgp_only_net in
-        prefix-list bgp_only_net out
+        no prefix-list bgp_only_net out
         filter-list BGP_ONLY_INTERNAL out
         route-map BGP_LOCAL_PREF in
   vrf LABA
@@ -3148,6 +3137,7 @@ router bgp 65010
   vrf TRANSIT
     router-id 172.24.1.49
     address-family ipv4 unicast
+      redistribute hmm route-map RM-BGP-DIRECT
       redistribute direct route-map RM-BGP-DIRECT
     neighbor 172.24.1.50
       inherit peer Firewall
@@ -3157,6 +3147,7 @@ router bgp 65010
         no prefix-list bgp_only_net out
         filter-list bgp_trans_in in
         filter-list BGP_ONLY_INTERNAL out
+        route-map BGP_EXT_PREF in
 
 
 
@@ -3172,9 +3163,9 @@ C1L-Bgw-R1#
 Cod1-FW-R1#sh run br
 Building configuration...
 
-Current configuration : 6087 bytes
+Current configuration : 6118 bytes
 !
-! Last configuration change at 02:01:28 PRM Fri Feb 14 2025
+! Last configuration change at 04:42:55 PRM Sat Feb 15 2025
 !
 version 15.7
 service timestamps debug datetime msec
@@ -3408,6 +3399,7 @@ router bgp 1111
  neighbor 172.24.1.5 as-override
  neighbor 172.24.1.49 remote-as 65010
  neighbor 172.24.1.49 description BRD_Leaf_VRF_TRANSIT
+ neighbor 172.24.1.49 shutdown
  neighbor 172.24.1.49 timers 7 21
  neighbor 172.24.1.49 send-community both
  neighbor 172.24.1.49 as-override
@@ -3488,12 +3480,10 @@ Cod1-FW-R1#
 <summary>Cod2-FW-R1</summary>
 
 ```text
-Cod2-FW-R1#sh run br
+Cod2-FW-R1#sh run
 Building configuration...
 
-Current configuration : 6702 bytes
-!
-! Last configuration change at 01:17:41 PRM Fri Feb 14 2025
+Current configuration : 6640 bytes
 !
 version 15.7
 service timestamps debug datetime msec
@@ -3536,9 +3526,9 @@ no ip icmp rate-limit unreachable
 
 
 !
+!
+!
 !         
-!
-!
 no ip domain lookup
 ip cef
 login on-success log
@@ -3559,9 +3549,9 @@ object-group network RFC1918
  172.16.0.0 255.240.0.0
  10.0.0.0 255.0.0.0
 !
-!         
-redundancy
 !
+redundancy
+!         
 no cdp log mismatch duplex
 !
 ip tcp synwait-time 5
@@ -3833,8 +3823,8 @@ Cod2-FW-R1#
 C2L-Bgw-R1# sh run
 
 !Command: show running-config
-!Running configuration last done at: Fri Feb 14 12:41:31 2025
-!Time: Fri Feb 14 14:13:46 2025
+!Running configuration last done at: Sat Feb 15 04:28:26 2025
+!Time: Sat Feb 15 05:25:25 2025
 
 version 10.3(5) Bios:version  
 hostname C2L-Bgw-R1
@@ -3896,6 +3886,8 @@ ip prefix-list bgp_only_host seq 10 permit 0.0.0.0/0 eq 32
 ip prefix-list bgp_only_net description Allow only CIDR prefix
 ip prefix-list bgp_only_net seq 10 deny 0.0.0.0/0 eq 32 
 ip prefix-list bgp_only_net seq 20 permit 0.0.0.0/0 le 31 
+ip prefix-list only_32_prefix description Allow only client host ip as /32 prefix
+ip prefix-list only_32_prefix seq 10 permit 0.0.0.0/0 eq 32 
 ip prefix-list outbound-no-host description Allow only CIDR prefix send to router
 ip prefix-list outbound-no-host seq 10 deny 0.0.0.0/0 eq 32 
 ip prefix-list outbound-no-host seq 20 permit 0.0.0.0/0 le 32 
@@ -3907,6 +3899,8 @@ route-map BGP_LOCAL_PREF permit 10
 route-map BGP_NO_PREF permit 10
   set local-preference 50
 route-map RM-BGP-DIRECT permit 10
+route-map only_32_prefix_to_transit permit 10
+  match ip address prefix-list only_32_prefix 
 key chain ISIS
   key 1
     key-string 7 072c0e681c
@@ -3916,26 +3910,21 @@ vrf context DEMO
   address-family ipv4 unicast
     route-target both auto
     route-target both auto evpn
-    route-target export 102:30
-    route-target export 102:30 evpn
 vrf context LABA
   vni 51010
   rd auto
   address-family ipv4 unicast
     route-target both auto
     route-target both auto evpn
-    route-target export 102:10
-    route-target export 102:10 evpn
 vrf context TRANSIT
   vni 51050
   rd auto
   address-family ipv4 unicast
-    route-target import 102:51010 evpn
-    route-target import 102:51030 evpn
-    route-target import 50:11
-    route-target import 50:11 evpn
-    route-target export 50:12
-    route-target export 50:12 evpn
+    route-target both auto
+    route-target both auto evpn
+    route-target import 65010:51050
+    route-target import 65010:51050 evpn
+    import map only_32_prefix_to_transit
 vrf context management
 hardware profile tcam resource template LEAF_TCAM_CARVE ref-template nfe
   racl 256
@@ -3945,10 +3934,6 @@ hardware profile tcam resource service-template LEAF_TCAM_CARVE
 
 
 interface Vlan1
-
-interface Vlan50
-  vrf member TRANSIT
-  ip address 10.105.1.2/24
 
 interface Vlan1010
   description L3VNI for vrf LABA
@@ -4014,8 +3999,6 @@ interface nve1
     multisite ingress-replication
   member vni 10000030
     multisite ingress-replication
-  member vni 10000050
-    multisite ingress-replication
 
 interface Ethernet1/1
   description **Fabric Internal to_COD-2_Spine-R1 **
@@ -4067,6 +4050,7 @@ interface Ethernet1/9
   description to_wan
   switchport mode trunk
   switchport trunk allowed vlan 1310,1330,1350
+  mtu 9216
   speed 1000
   duplex full
 
@@ -4292,11 +4276,11 @@ router bgp 65012
       address-family ipv4 unicast
         prefix-list bgp_only_host in
         filter-list bgp_trans_in in
-        filter-list bgp_trans_out out
+        no filter-list bgp_trans_out out
 
 
 
-C2L-Bgw-R1#
+C2L-Bgw-R1# 
 ```
 
 </details>
@@ -4579,7 +4563,7 @@ C2L-Leaf-R1# sh run
 
 !Command: show running-config
 !No configuration change since last restart
-!Time: Fri Feb 14 14:54:18 2025
+!Time: Sat Feb 15 05:26:59 2025
 
 version 10.3(5) Bios:version  
 hostname C2L-Leaf-R1
