@@ -8,3 +8,5 @@
 *.png binary
 *.jpg binary
 *.pptx binary
+*.gz binary
+
