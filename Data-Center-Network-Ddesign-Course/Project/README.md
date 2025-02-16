@@ -400,19 +400,139 @@ C1L-Bgw-R1(config)#
 1. ![двойной файрвол](./images/bad-1.png)
 2. ![полуоткрытые сессии](./images/bad-2.png)
 
-Решение было найдено в виде асихроной настройки inter-vrf (выполняется на наиболлее нагруженном сайте в плане файрволинга) которая выполняет две функции:
 
-1. Анонсирует, на обычном лифе, префиксы в транзитную VRF
-2. Получает `внешние` IP c `/32` префиксом, с соседнего сайта.
 
-Таким образом удалось добится что меж-VRF трафик который относится к соседнему сайту, на нем-же и орабатывается, при чём в зависимости кто ициатор пакеты, они буду проходить разные пары зон.
+Решение было найдено в виде асихроной настройки inter-vrf на бордер-лифе (выполняется на наиболлее нагруженном сайте в плане файрволинга) которая выполняет две функции:
+
+1. Анонсируем, на бордер-лифе, префиксы в транзитную VRF, путем импорта
+2. Получает `внешние` IP c `/32` префиксом, с соседнего сайта по транзитной VRF, и транслирует их обратно в пользовательские VRF на бордере.
+
+Таким образом удалось добится что меж-VRF трафик который относится к соседнему сайту, на нем-же и обрабатывается,
+ при чём в зависимости кто инициатор пакетов, они буду проходить разные пары зон.
 
 ![решение](./images/Solution.png)
 
-Вот так выглядит ликинг:
+1) Забираем префиксы в vrf TRANSIT из vrf LABA и vrf DEMO
 
 ```text
-C1L-Leaf-R3# sh run
+vrf context TRANSIT
+  ...
+  address-family ipv4 unicast
+    route-target import 65010:51010
+    route-target import 65010:51010 evpn
+    route-target import 65010:51030
+    route-target import 65010:51030 evpn
+```
+
+Но таким образом у нас заберется не только нужный нам маршрут типа `Type-5` полученный от `redistribute hmm`, но и `Type-2` который становится основным.
+
+![type2 and type5](./images/Type2_and_Type5.png)
+
+Решение - отфильтровать `import` для получния только Type-5 маршрута:
+
+```text
+C1L-Bgw-R1# 
+C1L-Bgw-R1# conf t
+Enter configuration commands, one per line. End with CNTL/Z.
+C1L-Bgw-R1(config)# 
+C1L-Bgw-R1(config)# ip prefix-list only_32_prefix description Allow only client host ip as /32 prefix
+C1L-Bgw-R1(config)# ip prefix-list only_32_prefix seq 10 permit 0.0.0.0/0 eq 32
+C1L-Bgw-R1(config)# 
+C1L-Bgw-R1(config)# route-map only_32_prefix_to_transit permit 10
+C1L-Bgw-R1(config-route-map)# match ip address prefix-list only_32_prefix
+C1L-Bgw-R1(config-route-map)# match evpn route-type 5
+C1L-Bgw-R1(config-route-map)# exit
+C1L-Bgw-R1(config)# 
+C1L-Bgw-R1(config)# vrf context TRANSIT
+C1L-Bgw-R1(config-vrf)# address-family ipv4 unicast
+C1L-Bgw-R1(config-vrf-af-ipv4)# import map only_32_prefix_to_transit
+C1L-Bgw-R1(config-vrf-af-ipv4)# end
+C1L-Bgw-R1# 
+```
+
+В итоге у нас остается только маршрут изученный по HMM на лифе, который и стал там `Type-5`:
+
+![Type-5 Only](./images/Type5_only.png)
+
+Маршруты полученный из второго сайта, мы заберем уже в сами vrf LABA и DEMO обратно из vrf TRANSIT:
+
+```text
+C1L-Bgw-R1(config)# c
+C1L-Bgw-R1(config)# vrf context DEMO
+C1L-Bgw-R1(config-vrf)# address-family ipv4 unicast
+C1L-Bgw-R1(config-vrf-af-ipv4)# route-target import 65010:51050
+C1L-Bgw-R1(config-vrf-af-ipv4)# route-target import 65010:51050 evpn 
+C1L-Bgw-R1(config-vrf-af-ipv4)# exit
+C1L-Bgw-R1(config-vrf)# exit
+C1L-Bgw-R1(config)# 
+C1L-Bgw-R1(config)# vrf context LABA
+C1L-Bgw-R1(config-vrf)# address-family ipv4 unicast
+C1L-Bgw-R1(config-vrf-af-ipv4)# route-target import 65010:51050
+C1L-Bgw-R1(config-vrf-af-ipv4)# route-target import 65010:51050 evpn 
+C1L-Bgw-R1(config-vrf-af-ipv4)# exit
+C1L-Bgw-R1(config-vrf)# exit
+C1L-Bgw-R1(config)#
+```
+
+... но фильтрацию на этот импорт, повесим уже на vrf `TRANSIT` как `export`! (он так-же сработает и на отправку в другой сайт):
+
+```text
+C1L-Bgw-R1(config)# 
+C1L-Bgw-R1(config)# route-map only_ext32_prefix_from_transit permit 10
+C1L-Bgw-R1(config-route-map)# match ip address prefix-list only_32_prefix
+C1L-Bgw-R1(config-route-map)# match evpn route-type 5
+C1L-Bgw-R1(config-route-map)# exit
+C1L-Bgw-R1(config)# 
+C1L-Bgw-R1(config)# 
+C1L-Bgw-R1(config)# vrf context TRANSIT
+C1L-Bgw-R1(config-vrf)#  address-family ipv4 unicast
+C1L-Bgw-R1(config-vrf-af-ipv4)# export map only_ext32_prefix_from_transit
+C1L-Bgw-R1(config-vrf-af-ipv4)# exit
+C1L-Bgw-R1(config-vrf)# exit
+C1L-Bgw-R1(config)#
+```
+
+Проверить чо всё сработало можно проверив что у нас появился /32 маршрут из первогоса сайта на файрволе второго,
+ и next-hop у него в vrf TRANSIT бордера во втором-же сайте:
+
+```text
+Cod2-FW-R1#sh ip route 172.24.10.30     
+Routing entry for 172.24.10.30/32
+  Known via "bgp 2222", distance 20, metric 0
+  Tag 65012, type external
+  Last update from 172.24.2.49 01:05:51 ago
+  Routing Descriptor Blocks:
+  * 172.24.2.49, from 172.24.2.49, 01:05:51 ago
+      Route metric is 0, traffic share count is 1
+      AS Hops 2
+      Route tag 65012
+      MPLS label: none
+Cod2-FW-R1#
+Cod2-FW-R1#
+Cod2-FW-R1#sh ip bgp 172.24.10.30/32
+BGP routing table entry for 172.24.10.30/32, version 33
+Paths: (1 available, best #1, table default)
+  Advertised to update-groups:
+     1         
+  Refresh Epoch 1
+  65012 65010
+    172.24.2.49 from 172.24.2.49 (172.24.2.49)
+      Origin incomplete, localpref 100, valid, external, best
+      Extended Community: RT:65012:51050
+      rx pathid: 0, tx pathid: 0x0
+Cod2-FW-R1#
+```
+
+Собственно на этом роль этого префикса и окончена, и для того что-бы не загромождать таблицы лифов,
+ мы можем тут его и "запереть", просто не получая из в других vrf-ах, получая только от файрвола только /24.
+
+> Примечание: тут придется следить что если на втором сайте нет, в пользовательском VRF-е, самих /24 маршрутов из первого сайта,
+> то хост в итоге может и не понять вообще куда ему пакеты отправлять.
+
+Вот так выглядит настройка в целом на первом сайте, на данный момент:
+
+```text
+C1L-Bgw-R1# sh run
 ...
 vrf context DEMO
   vni 51030
@@ -420,39 +540,120 @@ vrf context DEMO
   address-family ipv4 unicast
     route-target both auto
     route-target both auto evpn
-    route-target import 50:11
-    route-target import 50:11 evpn
-    route-target export 101:51030
-    route-target export 101:51030 evpn
+    route-target import 65010:51050
+    route-target import 65010:51050 evpn
 vrf context LABA
   vni 51010
   rd auto
   address-family ipv4 unicast
     route-target both auto
     route-target both auto evpn
-    route-target import 50:11
-    route-target import 50:11 evpn
-    route-target export 101:51010
-    route-target export 101:51010 evpn
+    route-target import 65010:51050
+    route-target import 65010:51050 evpn
 vrf context TRANSIT
   vni 51050
   rd auto
   address-family ipv4 unicast
-    route-target import 101:51010
-    route-target import 101:51010 evpn
-    route-target import 101:51030
-    route-target import 101:51030 evpn
-    route-target import 50:11
-    route-target import 50:11 evpn
-    route-target export 50:11
-    route-target export 50:11 evpn
+    route-target both auto
+    route-target both auto evpn
+    route-target import 65010:51010
+    route-target import 65010:51010 evpn
+    route-target import 65010:51030
+    route-target import 65010:51030 evpn
+    export map only_ext32_prefix_from_transit
+    import map only_32_prefix_to_transit
 ```
 
-Т.е. мы экспортируем из vrf LABA локальные префиксы, в vrf TRANSIT, а забираем из него-же по RT `50:11`
-При этом маршруты с RT `50:11` получены следующим путем, - на бордере этого-же сайта при получении маршрутов в vrf TRANSIT:
+Настройки BGP полные:
 
 ```text
-C1L-Bgw-R1(config)# sh run
+router bgp 65010
+  router-id 10.101.12.1
+  address-family ipv4 unicast
+    network 10.101.0.1/32
+    network 10.101.11.1/32
+    network 10.101.12.1/32
+  template peer Firewall
+    remote-as 1111
+    description Router as firewall
+    timers 7 21
+    address-family ipv4 unicast
+      send-community
+      send-community extended
+    address-family l2vpn evpn
+  template peer SPINES
+    remote-as 65010
+    update-source loopback2
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+  neighbor 10.101.212.1
+    inherit peer SPINES
+    description Spine-1
+  neighbor 10.101.222.1
+    inherit peer SPINES
+    description Spine-2
+  neighbor 10.102.0.1
+    remote-as 65012
+    description COD2-VTEP-BL1
+    update-source loopback100
+    disable-connected-check
+    peer-type fabric-external
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+      rewrite-evpn-rt-asn
+  neighbor 50.0.0.3
+    remote-as 65012
+    description COD2-BorderLeaf-1
+    update-source Ethernet1/4
+    timers 7 21
+    address-family ipv4 unicast
+  vrf DEMO
+    router-id 172.24.1.5
+    address-family ipv4 unicast
+      redistribute hmm route-map RM-BGP-DIRECT
+    neighbor 172.24.1.6
+      inherit peer Firewall
+      description COD-1-Router
+      address-family ipv4 unicast
+        prefix-list bgp_only_net in
+        no prefix-list bgp_only_net out
+        filter-list BGP_ONLY_INTERNAL out
+        route-map BGP_LOCAL_PREF in
+  vrf LABA
+    router-id 172.24.1.1
+    address-family ipv4 unicast
+      redistribute hmm route-map RM-BGP-DIRECT
+    neighbor 172.24.1.2
+      inherit peer Firewall
+      description COD-1-Router
+      address-family ipv4 unicast
+        prefix-list bgp_only_net in
+        no prefix-list bgp_only_net out
+        filter-list BGP_ONLY_INTERNAL out
+        route-map BGP_LOCAL_PREF in
+  vrf TRANSIT
+    router-id 172.24.1.49
+    address-family ipv4 unicast
+      redistribute hmm route-map RM-BGP-DIRECT
+      redistribute direct route-map RM-BGP-DIRECT
+    neighbor 172.24.1.50
+      inherit peer Firewall
+      address-family ipv4 unicast
+        no allowas-in 3
+        prefix-list bgp_only_host in
+        no prefix-list bgp_only_net out
+        filter-list bgp_trans_in in
+        filter-list BGP_ONLY_INTERNAL out
+        route-map BGP_EXT_PREF in
+C1L-Bgw-R1(config)#
+```
+
+На **втором** сайте настройки VRF такие:
+
+```text
+C2L-Bgw-R1# sh run
 ...
 vrf context DEMO
   vni 51030
@@ -460,37 +661,108 @@ vrf context DEMO
   address-family ipv4 unicast
     route-target both auto
     route-target both auto evpn
-    route-target export 101:30
-    route-target export 101:30 evpn
 vrf context LABA
   vni 51010
   rd auto
   address-family ipv4 unicast
     route-target both auto
     route-target both auto evpn
-    route-target export 101:10
-    route-target export 101:10 evpn
 vrf context TRANSIT
   vni 51050
   rd auto
   address-family ipv4 unicast
     route-target both auto
     route-target both auto evpn
-    route-target import 101:51010
-    route-target import 101:51010 evpn
-    route-target import 101:51030
-    route-target import 101:51030 evpn
-    route-target export 50:11
-    route-target export 50:11 evpn
-vrf context VRF_VPC_KEEPALIVE
+    route-target import 65010:51050
+    route-target import 65010:51050 evpn
+    export map only_ext32_prefix_from_transit
+    import map only_32_prefix_to_transit
 ```
 
-#### Вот что у нас так получилось
+> Обратите внимание какой тут `route-target import` - указан BGP именно **первого** сайта!
+
+И BGP:
+
+```text
+router bgp 65012
+  router-id 10.102.12.1
+  address-family ipv4 unicast
+    network 10.102.0.1/32
+    network 10.102.11.1/32
+    network 10.102.12.1/32
+  template peer Firewall
+    remote-as 2222
+    timers 7 21
+    address-family ipv4 unicast
+      send-community
+      send-community extended
+  template peer SPINES
+    remote-as 65012
+    update-source loopback2
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+  neighbor 10.101.0.1
+    remote-as 65010
+    description COD1-VTEP-BL1
+    update-source loopback100
+    disable-connected-check
+    peer-type fabric-external
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+      rewrite-evpn-rt-asn
+  neighbor 10.102.212.1
+    inherit peer SPINES
+    description COD2-Spine-1
+  neighbor 50.0.0.1
+    remote-as 65010
+    description COD1-BorderLeaf-1
+    update-source Ethernet1/4
+    address-family ipv4 unicast
+  vrf DEMO
+    router-id 172.24.2.5
+    address-family ipv4 unicast
+      redistribute direct route-map RM-BGP-DIRECT
+    neighbor 172.24.2.6
+      inherit peer Firewall
+      address-family ipv4 unicast
+        prefix-list bgp_only_net in
+        filter-list BGP_ONLY_INTERNAL out
+        route-map BGP_LOCAL_PREF in
+  vrf LABA
+    router-id 172.24.2.1
+    address-family ipv4 unicast
+      redistribute direct route-map RM-BGP-DIRECT
+    neighbor 172.24.2.2
+      inherit peer Firewall
+      address-family ipv4 unicast
+        prefix-list bgp_only_net in
+        filter-list BGP_ONLY_INTERNAL out
+        route-map BGP_LOCAL_PREF in
+  vrf TRANSIT
+    router-id 172.24.2.49
+    address-family ipv4 unicast
+      redistribute hmm route-map RM-BGP-DIRECT
+      redistribute direct route-map RM-BGP-DIRECT
+    neighbor 172.24.2.50
+      inherit peer Firewall
+      address-family ipv4 unicast
+        prefix-list bgp_only_host in
+        filter-list bgp_trans_in in
+        no filter-list bgp_trans_out out
+C2L-Bgw-R1#
+```
+
+---
+
+#### Вот что у нас в итоге получилось
 
 Если мы пингуем из ЦОД-1, с хоста которые находится в vrf LABA, хост во втором ЦОД-е, но который находится в vrf DEMO:
 
 Внутри сайта ЦОД-1, - отправка:
 ![до бордера отправка](./images/DC1_to_DC2/1-1.png)
+
 Внутри сайта ЦОД-1, - получаем:
 ![до бордера полчаем](./images/DC1_to_DC2/1-2.png)
 
@@ -508,7 +780,8 @@ vrf context VRF_VPC_KEEPALIVE
 
 ![dc1-dc2-fw](./images/DC1_to_DC2/3.png)
 
-Вот тут сразу видно где происходит переход из `транзита` в `демо` где уже и нахрдится нужный нам хост, а наличии признака в ZBF `Established` говорит нам о том что пакеты идут обратно через него же.
+Вот тут сразу видно где происходит переход из `транзита` в `демо` где уже и нахрдится нужный нам хост,
+ а наличии признака в ZBF `Established` говорит нам о том что пакеты идут обратно через него же.
 
 Файрвол во втором сайте:
 
@@ -518,9 +791,10 @@ vrf context VRF_VPC_KEEPALIVE
 
 ![К фарволу от хоста](./images/DC1_to_DC2/4-2.png)
 
-Как мы видим тут без сюрпризов, все идет в предедах своего `vrf DEMO`
+Как мы видим тут без сюрпризов, все идет в пределах своего `vrf DEMO`
 
-А вот если инициатор уже тот-же хост что выше, то трафик идет по другому пути, он пожож, да не совсем:
+// TODO: исправить:
+//? A вот если инициатор уже тот-же хост что выше, то трафик идет по другому пути, он пожож, да не совсем:
 
 От лифа:
 
@@ -3472,9 +3746,9 @@ end
 Cod1-FW-R1#
 ```
 
----
-
 </details>
+
+---
 
 <details>
 <summary>Cod2-FW-R1</summary>
