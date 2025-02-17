@@ -9,12 +9,12 @@
 Схема подключения опорной сети осталась прежняя, как в LAB-3 на IS-IS протоколе,
 но добавлен второй сайт и пара файрволов с каждой стороны.
 
-![Топология-и-маршрутизатор](./images/gns3-project.png)
+![Топология-и-маршрутизатор](./images/gns3-project-nolabel.png)
 
 Лифы Leaf-1/2 и C1L-Leaf-R4 выключены, для экономии ресурсов, - на них ранее были отработаны техники [vPC](../lab-7/README.md) и локального [route-leaking](../lab-8/README.md).
 
 <details>
- <summary>План адрессного пространства</summary>
+ <summary>План адресного пространства</summary>
 
 Общая сеть для всех ЦОД-ов (для трех): ```10.100.0.0/14```
 
@@ -24,7 +24,7 @@
 2) Для первого ЦОД-а суммарное: ```10.101.0.0/16``` ( 10.101.0.1 - 10.101.255.254 )
 3) Для второго ЦОД-а суммарное: ```10.102.0.0/16``` ( 10.102.0.1 - 10.102.255.254 )
 
-Таким образом план нумерации будет следуюший
+Таким образом план нумерации будет следующий
 
 IP = 10.10**D**.**S**xy.**M**zz
 
@@ -43,38 +43,38 @@ IP = 10.10**D**.**S**xy.**M**zz
 
 - 1 - Loopback 1 для UNDERLAY
 - 2 - Loopback 2 для OVERLAY
-- 3 - резерв, напрмер дял vPC keep-alive
+- 3 - резерв, например дял vPC keep-alive
 - 4 - p2p линк
 - 5 - сервисы
 
-Loopack-s:
+Loopback-s:
 
-- ```10.101.111.1/32``` - ЦОД-1, Leaf-1,  Loopack - 1
-- ```10.101.112.1/32``` - ЦОД-1, Leaf-1,  Loopack - 2
-- ```10.101.121.1/32``` - ЦОД-1, Leaf-2,  Loopack - 1
-- ```10.101.122.1/32``` - ЦОД-1, Leaf-2,  Loopack - 2
-- ```10.101.131.1/32``` - ЦОД-1, Leaf-3,  Loopack - 1
-- ```10.101.132.1/32``` - ЦОД-1, Leaf-3,  Loopack - 2
-- ```10.101.141.1/32``` - ЦОД-1, Leaf-4,  Loopack - 1
-- ```10.101.142.1/32``` - ЦОД-1, Leaf-4,  Loopack - 2
-- ```10.101.211.1/32``` - ЦОД-1, Spine-1, Loopack - 1
-- ```10.101.212.1/32``` - ЦОД-1, Spine-1, Loopack - 2
-- ```10.101.221.1/32``` - ЦОД-1, Spine-2, Loopack - 1
-- ```10.101.222.1/32``` - ЦОД-1, Spine-2, Loopack - 2
+- ```10.101.111.1/32``` - ЦОД-1, Leaf-1,  Loopback - 1
+- ```10.101.112.1/32``` - ЦОД-1, Leaf-1,  Loopback - 2
+- ```10.101.121.1/32``` - ЦОД-1, Leaf-2,  Loopback - 1
+- ```10.101.122.1/32``` - ЦОД-1, Leaf-2,  Loopback - 2
+- ```10.101.131.1/32``` - ЦОД-1, Leaf-3,  Loopback - 1
+- ```10.101.132.1/32``` - ЦОД-1, Leaf-3,  Loopback - 2
+- ```10.101.141.1/32``` - ЦОД-1, Leaf-4,  Loopback - 1
+- ```10.101.142.1/32``` - ЦОД-1, Leaf-4,  Loopback - 2
+- ```10.101.211.1/32``` - ЦОД-1, Spine-1, Loopback - 1
+- ```10.101.212.1/32``` - ЦОД-1, Spine-1, Loopback - 2
+- ```10.101.221.1/32``` - ЦОД-1, Spine-2, Loopback - 1
+- ```10.101.222.1/32``` - ЦОД-1, Spine-2, Loopback - 2
 
-Border Leaf Loopacks:
+Border Leaf Loopback:
 
-- ```10.101.11.1``` - ЦОД-1, BRD-Leaf-1 Loopack-1
-- ```10.101.12.1``` - ЦОД-1, BRD-Leaf-1 Loopack-2
-- ```10.101.21.1``` - ЦОД-1, BRD-Leaf-2 Loopack-1
-- ```10.101.22.1``` - ЦОД-1, BRD-Leaf-2 Loopack-2
+- ```10.101.11.1``` - ЦОД-1, BRD-Leaf-1 Loopback-1
+- ```10.101.12.1``` - ЦОД-1, BRD-Leaf-1 Loopback-2
+- ```10.101.21.1``` - ЦОД-1, BRD-Leaf-2 Loopback-1
+- ```10.101.22.1``` - ЦОД-1, BRD-Leaf-2 Loopback-2
 
 Примеры сетей для vPC:
 
 - ```10.101.113.0/30``` - vPC ЦОД-1, Leaf-1 to Leaf-2 (10.101.113.1 - 10.101.113.2)
 - ```10.101.133.0/30``` - vPC ЦОД-1, Leaf-3 to Leaf-4 (10.101.133.1 - 10.101.133.2)
 
-Cети P2P пиров, как и нумерация в октете идёт со стороны Spine:
+Сети P2P пиров, как и нумерация в октете идёт со стороны Spine:
 
 - ```10.101.214.0/30``` - сеть в ЦОД-1, Spine-1 до Leaf-1 (10.101.214.1  - 10.101.214.2)
 - ```10.101.214.4/30``` - сеть в ЦОД-1, Spine-1 до Leaf-2 (10.101.214.5  - 10.101.214.6)
@@ -202,13 +202,13 @@ Eth1/2               10.101.24.6
 
 Основные понятия:
 
-1. Netwotk Virtualization Overlay (NVO) - оверлейная сеть
-2. VXLAN Tunnel End Point (VTEP) - само устройство которое занимается инкапсуляцией/декапсуляцией VxLAN фреймов
+1. Network Virtualization Overlay (NVO) - оверлейная сеть
+2. VxLAN Tunnel End Point (VTEP) - само устройство которое занимается инкапсуляцией/декапсуляцией VxLAN фреймов
 3. Network Virtualization Edge (NVE) - туннельный интерфейс инкапсуляцией/декапсуляцией VxLAN фреймов.
- Можно сравнить в транком до сотальных VTEP-ов, или как GRE туннель.
+ Можно сравнить в транком до остальных VTEP-ов, или как GRE туннель.
 4. Virtual Network Identifier (VNI) - метка VxLAN инкапсуляции, определяющая Layer-2 домен в оверлейной сети.
- Должна быть одинакова на всех VTEP-ах куда нам необходимо соеденить наш L2 домен.
-5. MAC-VRF - воспринимаем как EVPN-instanc, как VLAN примапленный к NVI и учавствующий в VxLAN инкапсуляции/декапсуляции.
+ Должна быть одинакова на всех VTEP-ах куда нам необходимо соединить наш L2 домен.
+5. MAC-VRF - воспринимаем как EVPN-instanc, как VLAN примапленный к NVI и участвующий в VxLAN инкапсуляции/декапсуляции.
  (Можно представить типа как "L2-роутинг" между VTEP-ами).
  В Общем сколько у нас будет VLAN-ов с VNI - столько у нас будет и MAC-VRF-ов,
  поскольку у каждого MAC-VRF будет свой Route-Target (RT) и свой Route Destingisher (RD) - типа L2-VRF такие.
@@ -216,12 +216,12 @@ Eth1/2               10.101.24.6
 
 ---
 
-### Проект: Модернизация ядра сети ЦОД с переходом на VXLAN
+### Проект: Модернизация ядра сети ЦОД с переходом на VxLAN
 
 Задачи:
 
 1. Настроить рядом еще одну VxLAN фабрику, и настроить Multi-Site
-2. Настроите маршрутизацию между клиентами через внешнее устройство (граничный роутер\фаерволл\etc) в своей  фабрике, - клиенты между серверами переходят между VRF-ами только в пределах одного сайта.
+2. Настроите маршрутизацию между клиентами через внешнее устройство (граничный роутер\фаервол\etc) в своей  фабрике, - клиенты между серверами переходят между VRF-ами только в пределах одного сайта.
 
 ---
 
@@ -238,12 +238,12 @@ fabric forwarding anycast-gateway-mac 0001.0001.0001
 
 1. Прописать команду глобальную на каждом бордере, который получит роль Border Gateway:
   `evpn multisite border-gateway xxx`, где `xxx` это уникальнй номер сайта.
-2. Создать отдельный Loopack со своим уникадьным IP, для взаимодействия между сайтами.
+2. Создать отдельный Loopback со своим уникальным IP, для взаимодействия между сайтами.
 3. Обеспечить доступность всех лупбэков одного бордера на втором.
 4. На интерфейсе в сторону второго сайта необходимо прописать `evpn multisite dci-tracking`
 5. И на бардере, на каждом интерфейсе в сторону своего спайна, - `evpn multisite fabric-tracking`
 
-В ЦОД-1 (Внимание -это приводит к остоновке интерфейса NVE1!):
+В ЦОД-1 (Внимание -это приводит к остановке интерфейса NVE1!):
 
 ```text
 C1L-Bgw-R1# conf t
@@ -261,7 +261,7 @@ C1L-Bgw-R1(config-if-nve)# exit
 C1L-Bgw-R1(config)# 
 ```
 
-В ЦОД-2 (Внимание -это приводит к остоновке интерфейса NVE1!):
+В ЦОД-2 (Внимание -это приводит к остановке интерфейса NVE1!):
 
 ```text
 C2L-Bgw-R1# conf t
@@ -331,7 +331,9 @@ C1L-Bgw-R1# sh ip bgp neighbors 50.0.0.3 advertised-routes | b Network
 C1L-Bgw-R1# 
 ```
 
-Если всё успешно, то настроим уже сам Multi-Site, который нам будет передавать в качестве пятого типа свои маршруты, но видить мы будет только соседний бордер и будем строить свои туннели именно до него, таким образом мы будем полностью изолированы от соседнего сайта(ов).
+Если всё успешно, то настроим уже сам Multi-Site, который нам будет передавать в качестве пятого типа свои маршруты,
+ но видеть мы будет только соседний бордер и будем строить свои туннели именно до него,
+ таким образом мы будем полностью изолированы от соседнего сайта(ов).
 
 ```text
 C1L-Bgw-R1(config)# 
@@ -365,7 +367,7 @@ C1L-Bgw-R1(config)# sh bgp l2vpn evpn summary | i 10.102.0.1
 C1L-Bgw-R1(config)# 
 ```
 
-И прверим например маршруты Type-2 которые мы от него получили:
+И проверим например маршруты Type-2 которые мы от него получили:
 
 ```text
 C1L-Bgw-R1(config)# sh bgp l2vpn evpn neighbors 10.102.0.1 routes | b Network  | i e\[2
@@ -389,112 +391,376 @@ C1L-Bgw-R1(config)# sh bgp l2vpn evpn neighbors 10.102.0.1 routes | b Network  |
 C1L-Bgw-R1(config)#
 ```
 
-На этом настройка межсайтового взаимодействия закончена, но при подключении аналогичного файрвола во втором сайте наш ждет неприятный сюрприз, - при потытке пропинговать пропинговать хост котороый находится в другом сайте  и в другом VRF, на будут полуоткрые сесси на фарйволе, поскольку пакеты идут **обратно другим** путем:
+На этом настройка межсайтового взаимодействия закончена, но при подключении аналогичного файрвола во втором сайте наш ждет неприятный сюрприз, - при попытке пропинговать хост которой находится в другом сайте  и в другом VRF, на будут полуоткрытые сессии на файрволе, поскольку пакеты идут **обратно другим** путем:
 
 ![первая_проблема_с_файрволами](./images/First_Bad_Path.png)
 
-Это связано с тем для клиента обратный путь приходит из соседнего сайта в виде префикса `/24`, в своем L3VNI, которую соседний файрвол аннонсирует, как мы и настраивали ранее в 8-й лабе.
+Это связано с тем для клиента обратный путь приходит из соседнего сайта в виде префикса `/24`, в своем L3VNI, которую соседний файрвол анонсирует, как мы и настраивали ранее в 8-й лабе.
 
-Первым шагом была предпринята попытка создать отдельный L3VNI для передачи `/32` префиксов полученных в файрволе от хостов, и передачи егоо в свой отдельный VRF, но столкнулся с рядом проблем:
+Первым шагом была предпринята попытка создать отдельный L3VNI для передачи `/32` префиксов полученных в файрволе от хостов, и передачи его в свой отдельный VRF, но столкнулся с рядом проблем:
 
 1. ![двойной файрвол](./images/bad-1.png)
 2. ![полуоткрытые сессии](./images/bad-2.png)
 
-Решение было найдено в виде асихроной настройки inter-vrf (выполняется на наиболлее нагруженном сайте в плане файрволинга) которая выполняет две функции:
+Решение было найдено в виде асинхронной настройки inter-vrf на бордер-лифе (выполняется на наиболее нагруженном сайте в плане файрволинга) которая выполняет две функции:
 
-1. Анонсирует, на обычном лифе, префиксы в транзитную VRF
-2. Получает `внешние` IP c `/32` префиксом, с соседнего сайта.
+1. Анонсируем, на бордер-лифе, префиксы в транзитную VRF, путем импорта
+2. Получает `внешние` IP c `/32` префиксом, с соседнего сайта по транзитной VRF, и транслирует их обратно в пользовательские VRF на бордере.
 
-Таким образом удалось добится что меж-VRF трафик который относится к соседнему сайту, на нем-же и орабатывается, при чём в зависимости кто ициатор пакеты, они буду проходить разные пары зон.
+Таким образом удалось добиться что меж-VRF трафик который относится к соседнему сайту, на нем-же и обрабатывается,
+ при чём в зависимости кто инициатор пакетов, они буду проходить разные пары зон.
 
 ![решение](./images/Solution.png)
 
-Вот так выглядит ликинг:
+1) Забираем префиксы в vrf TRANSIT из vrf LABA и vrf DEMO
 
 ```text
-C1L-Leaf-R3# sh run
+vrf context TRANSIT
+  ...
+  address-family ipv4 unicast
+    route-target import 65010:51010
+    route-target import 65010:51010 evpn
+    route-target import 65010:51030
+    route-target import 65010:51030 evpn
+```
+
+Но таким образом у нас заберется не только нужный нам маршрут типа `Type-5` полученный от `redistribute hmm`, но и `Type-2` который становится основным.
+
+![type2 and type5](./images/Type2_and_Type5.png)
+
+Решение - отфильтровать `import` для получения только Type-5 маршрута:
+
+```text
+C1L-Bgw-R1# 
+C1L-Bgw-R1# conf t
+Enter configuration commands, one per line. End with CNTL/Z.
+C1L-Bgw-R1(config)# 
+C1L-Bgw-R1(config)# ip prefix-list only_32_prefix description Allow only client host ip as /32 prefix
+C1L-Bgw-R1(config)# ip prefix-list only_32_prefix seq 10 permit 0.0.0.0/0 eq 32
+C1L-Bgw-R1(config)# 
+C1L-Bgw-R1(config)# route-map only_32_prefix_to_transit permit 10
+C1L-Bgw-R1(config-route-map)# match ip address prefix-list only_32_prefix
+C1L-Bgw-R1(config-route-map)# match evpn route-type 5
+C1L-Bgw-R1(config-route-map)# exit
+C1L-Bgw-R1(config)# 
+C1L-Bgw-R1(config)# vrf context TRANSIT
+C1L-Bgw-R1(config-vrf)# address-family ipv4 unicast
+C1L-Bgw-R1(config-vrf-af-ipv4)# import map only_32_prefix_to_transit
+C1L-Bgw-R1(config-vrf-af-ipv4)# end
+C1L-Bgw-R1# 
+```
+
+В итоге у нас остается только маршрут изученный по HMM на лифе, который и стал там `Type-5`:
+
+![Type-5 Only](./images/Type5_only.png)
+
+Маршруты полученный из второго сайта, мы заберем уже в сами vrf LABA и DEMO обратно из vrf TRANSIT:
+
+```text
+C1L-Bgw-R1(config)# c
+C1L-Bgw-R1(config)# vrf context DEMO
+C1L-Bgw-R1(config-vrf)# address-family ipv4 unicast
+C1L-Bgw-R1(config-vrf-af-ipv4)# route-target import 65010:51050
+C1L-Bgw-R1(config-vrf-af-ipv4)# route-target import 65010:51050 evpn 
+C1L-Bgw-R1(config-vrf-af-ipv4)# exit
+C1L-Bgw-R1(config-vrf)# exit
+C1L-Bgw-R1(config)# 
+C1L-Bgw-R1(config)# vrf context LABA
+C1L-Bgw-R1(config-vrf)# address-family ipv4 unicast
+C1L-Bgw-R1(config-vrf-af-ipv4)# route-target import 65010:51050
+C1L-Bgw-R1(config-vrf-af-ipv4)# route-target import 65010:51050 evpn 
+C1L-Bgw-R1(config-vrf-af-ipv4)# exit
+C1L-Bgw-R1(config-vrf)# exit
+C1L-Bgw-R1(config)#
+```
+
+... но фильтрацию на этот `route-target import`, повесим уже на vrf `TRANSIT` как `export map`! (он так-же сработает и на отправку в другой сайт):
+
+```text
+C1L-Bgw-R1(config)# 
+C1L-Bgw-R1(config)# route-map only_ext32_prefix_from_transit permit 10
+C1L-Bgw-R1(config-route-map)# match ip address prefix-list only_32_prefix
+C1L-Bgw-R1(config-route-map)# match evpn route-type 5
+C1L-Bgw-R1(config-route-map)# exit
+C1L-Bgw-R1(config)# 
+C1L-Bgw-R1(config)# 
+C1L-Bgw-R1(config)# vrf context TRANSIT
+C1L-Bgw-R1(config-vrf)#  address-family ipv4 unicast
+C1L-Bgw-R1(config-vrf-af-ipv4)# export map only_ext32_prefix_from_transit
+C1L-Bgw-R1(config-vrf-af-ipv4)# exit
+C1L-Bgw-R1(config-vrf)# exit
+C1L-Bgw-R1(config)#
+```
+
+Проверить чо всё сработало можно проверив что у нас появился /32 маршрут из первого сайта на файрволе второго,
+ и next-hop у него в vrf TRANSIT бордера во втором-же сайте:
+
+```text
+Cod2-FW-R1#sh ip route 172.24.10.30 
+Routing entry for 172.24.10.30/32
+  Known via "bgp 2222", distance 20, metric 0
+  Tag 65012, type external
+  Last update from 172.24.2.49 00:01:16 ago
+  Routing Descriptor Blocks:
+  * 172.24.2.49, from 172.24.2.49, 00:01:16 ago
+      Route metric is 0, traffic share count is 1
+      AS Hops 2
+      Route tag 65012
+      MPLS label: none
+Cod2-FW-R1#
+Cod2-FW-R1#sh ip bgp 172.24.10.30/32
+BGP routing table entry for 172.24.10.30/32, version 14
+Paths: (1 available, best #1, table default)
+  Advertised to update-groups:
+     5          8         
+  Refresh Epoch 1
+  65012 65010
+    172.24.2.49 from 172.24.2.49 (172.24.2.49)
+      Origin incomplete, localpref 100, valid, external, best
+      Extended Community: RT:65012:51050
+      rx pathid: 0, tx pathid: 0x0
+Cod2-FW-R1#
+```
+
+Собственно на этом роль этого префикса и окончена, и для того что-бы не загромождать таблицы лифов,
+мы можем тут его и "запереть", просто не получая из в других vrf-ах, получая только от фаервола только /24
+ и настроив дефолт на бордере.
+
+> Примечание: тут придется следить что если на втором сайте нет, в пользовательском VRF-е,
+> самих /24 и/или /32 маршрутов из первого сайта,
+> то хост в итоге может и не понять вообще куда ему пакеты отправлять.
+
+Вот так выглядит настройка в целом на **первом** сайте:
+
+```text
+C1L-Bgw-R1# sh run
 ...
 vrf context DEMO
   vni 51030
+  ip route 0.0.0.0/0 172.24.1.6 name DefToFirewall tag 201 10
   rd auto
   address-family ipv4 unicast
     route-target both auto
     route-target both auto evpn
-    route-target import 50:11
-    route-target import 50:11 evpn
-    route-target export 101:51030
-    route-target export 101:51030 evpn
+    route-target import 65010:51050
+    route-target import 65010:51050 evpn
 vrf context LABA
   vni 51010
+  ip route 0.0.0.0/0 172.24.1.2 name DefToFirewall tag 201 10
   rd auto
   address-family ipv4 unicast
     route-target both auto
     route-target both auto evpn
-    route-target import 50:11
-    route-target import 50:11 evpn
-    route-target export 101:51010
-    route-target export 101:51010 evpn
+    route-target import 65010:51050
+    route-target import 65010:51050 evpn
 vrf context TRANSIT
   vni 51050
   rd auto
   address-family ipv4 unicast
-    route-target import 101:51010
-    route-target import 101:51010 evpn
-    route-target import 101:51030
-    route-target import 101:51030 evpn
-    route-target import 50:11
-    route-target import 50:11 evpn
-    route-target export 50:11
-    route-target export 50:11 evpn
+    route-target both auto
+    route-target both auto evpn
+    route-target import 65010:51010
+    route-target import 65010:51010 evpn
+    route-target import 65010:51030
+    route-target import 65010:51030 evpn
+    export map only_ext32_prefix_from_transit
+    import map only_32_prefix_to_transit
 ```
 
-Т.е. мы экспортируем из vrf LABA локальные префиксы, в vrf TRANSIT, а забираем из него-же по RT `50:11`
-При этом маршруты с RT `50:11` получены следующим путем, - на бордере этого-же сайта при получении маршрутов в vrf TRANSIT:
+И настройки VRF-ов на **втором** сайте:
 
 ```text
-C1L-Bgw-R1(config)# sh run
-...
 vrf context DEMO
   vni 51030
+  ip route 0.0.0.0/0 172.24.2.6 name DefToFirewall tag 202 240
   rd auto
   address-family ipv4 unicast
     route-target both auto
     route-target both auto evpn
-    route-target export 101:30
-    route-target export 101:30 evpn
 vrf context LABA
   vni 51010
+  ip route 0.0.0.0/0 172.24.2.2 name DefToFirewall tag 202 240
   rd auto
   address-family ipv4 unicast
     route-target both auto
     route-target both auto evpn
-    route-target export 101:10
-    route-target export 101:10 evpn
 vrf context TRANSIT
   vni 51050
   rd auto
   address-family ipv4 unicast
     route-target both auto
     route-target both auto evpn
-    route-target import 101:51010
-    route-target import 101:51010 evpn
-    route-target import 101:51030
-    route-target import 101:51030 evpn
-    route-target export 50:11
-    route-target export 50:11 evpn
-vrf context VRF_VPC_KEEPALIVE
+    export map only_ext32_prefix_from_transit
+    import map only_32_prefix_to_transit
 ```
 
-#### Вот что у нас так получилось
+Они ничем кроме ликинга не отличаются, что дает возможность менять местами роли с одного сайта на второй.
+
+Настройки BGP полные на **первом**:
+
+```text
+C1L-Bgw-R1# sh run | sec router
+ [skip]
+router bgp 65010
+  router-id 10.101.12.1
+  address-family ipv4 unicast
+    network 10.101.0.1/32
+    network 10.101.11.1/32
+    network 10.101.12.1/32
+  template peer Firewall
+    remote-as 1111
+    description Router as firewall
+    timers 7 21
+    address-family ipv4 unicast
+      send-community
+      send-community extended
+      prefix-list bgp_only_net in
+      filter-list BGP_ONLY_INTERNAL out
+    address-family l2vpn evpn
+  template peer SPINES
+    remote-as 65010
+    update-source loopback2
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+  neighbor 10.101.212.1
+    inherit peer SPINES
+    description Spine-1
+  neighbor 10.101.222.1
+    inherit peer SPINES
+    description Spine-2
+  neighbor 10.102.0.1
+    remote-as 65012
+    description COD2-VTEP-BL1
+    update-source loopback100
+    disable-connected-check
+    peer-type fabric-external
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+      rewrite-evpn-rt-asn
+  neighbor 50.0.0.3
+    remote-as 65012
+    description COD2-BorderLeaf-1
+    update-source Ethernet1/4
+    timers 7 21
+    address-family ipv4 unicast
+  vrf DEMO
+    router-id 172.24.1.5
+    address-family ipv4 unicast
+      redistribute static route-map bgp_static_default
+      default-information originate
+    neighbor 172.24.1.6
+      inherit peer Firewall
+      description COD-1-Router
+  vrf LABA
+    router-id 172.24.1.1
+    address-family ipv4 unicast
+      redistribute static route-map bgp_static_default
+      default-information originate
+    neighbor 172.24.1.2
+      inherit peer Firewall
+      description COD-1-Router
+  vrf TRANSIT
+    router-id 172.24.1.49
+    neighbor 172.24.1.50
+      remote-as 2222
+      timers 7 21
+      address-family ipv4 unicast
+        send-community
+        send-community extended
+        prefix-list bgp_only_host in
+        filter-list bgp_trans_in in
+C1L-Bgw-R1# 
+```
+
+И BGP на **втором** сайте:
+
+```text
+C2L-Bgw-R1# sh run | sec router
+ [skip]
+router bgp 65012
+  router-id 10.102.12.1
+  address-family ipv4 unicast
+    network 10.102.0.1/32
+    network 10.102.11.1/32
+    network 10.102.12.1/32
+  template peer Firewall
+    remote-as 2222
+    timers 7 21
+    address-family ipv4 unicast
+      send-community
+      send-community extended
+      prefix-list bgp_only_net in
+      filter-list BGP_ONLY_INTERNAL out
+  template peer SPINES
+    remote-as 65012
+    update-source loopback2
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+  neighbor 10.101.0.1
+    remote-as 65010
+    description COD1-VTEP-BL1
+    update-source loopback100
+    disable-connected-check
+    peer-type fabric-external
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+      rewrite-evpn-rt-asn
+  neighbor 10.102.212.1
+    inherit peer SPINES
+    description COD2-Spine-1
+  neighbor 50.0.0.1
+    remote-as 65010
+    description COD1-BorderLeaf-1
+    update-source Ethernet1/4
+    address-family ipv4 unicast
+  vrf DEMO
+    router-id 172.24.2.5
+    address-family ipv4 unicast
+      redistribute static route-map bgp_static_default
+      default-information originate
+    neighbor 172.24.2.6
+      inherit peer Firewall
+  vrf LABA
+    router-id 172.24.2.1
+    address-family ipv4 unicast
+      redistribute static route-map bgp_static_default
+      default-information originate
+    neighbor 172.24.2.2
+      inherit peer Firewall
+  vrf TRANSIT
+    router-id 172.24.2.49
+    address-family ipv4 unicast
+    neighbor 172.24.2.50
+      remote-as 2222
+      address-family ipv4 unicast
+        send-community
+        send-community extended
+        prefix-list bgp_only_host in
+        filter-list bgp_trans_in in
+C2L-Bgw-R1#
+```
+
+---
+
+#### Вот что у нас в итоге получилось
+
+Для начала, как распотраняются маршруты:
+
+![prefix's path](./images/Prefixses_Animation.gif)
 
 Если мы пингуем из ЦОД-1, с хоста которые находится в vrf LABA, хост во втором ЦОД-е, но который находится в vrf DEMO:
 
 Внутри сайта ЦОД-1, - отправка:
 ![до бордера отправка](./images/DC1_to_DC2/1-1.png)
+
 Внутри сайта ЦОД-1, - получаем:
 ![до бордера полчаем](./images/DC1_to_DC2/1-2.png)
 
-Вот тут уже видно что оправлем в `транзите`, а получаем в `лабе`
+Вот тут видно что получаем и оправлем в своей "родной" `vrf LABA`
 
 Далее, между -сайтов, отправка:
 ![межсайт - отправка](./images/DC1_to_DC2/2-1.png)
@@ -502,25 +768,28 @@ vrf context VRF_VPC_KEEPALIVE
 Получение:
 ![межсайт - получение](./images/DC1_to_DC2/2-2.png)
 
-Мы все так-же отпрвляем в `транзите`, а получаем в `лабе`.
+Тут уже иде в обе сторону через наш выделенный `vrf TRANSIT`!
 
-Теперь посмотрим как видит файрвол:
+Теперь посмотрим как видит файрвол во втором сайте:
 
 ![dc1-dc2-fw](./images/DC1_to_DC2/3.png)
 
-Вот тут сразу видно где происходит переход из `транзита` в `демо` где уже и нахрдится нужный нам хост, а наличии признака в ZBF `Established` говорит нам о том что пакеты идут обратно через него же.
+Вот тут сразу видно где происходит переход из `транзита` в `демо` где уже и находится нужный нам хост,
+ а наличии признака в ZBF `Established` говорит нам о том что пакеты идут обратно через него же.
 
-Файрвол во втором сайте:
+Далее уже пакеты бегут по родному для хоста во втором сайте `vrf DEMO`:
 
-![От файрвола до хоста](./images/DC1_to_DC2/4-1.png)
+![От спайна до лифа](./images/DC1_to_DC2/4-1.png)
 
 Обратно:
 
-![К фарволу от хоста](./images/DC1_to_DC2/4-2.png)
+![К спайну от лифа](./images/DC1_to_DC2/4-2.png)
 
-Как мы видим тут без сюрпризов, все идет в предедах своего `vrf DEMO`
+Как мы видим тут без сюрпризов, всё идет в пределах своего `vrf DEMO`.
 
-А вот если инициатор уже тот-же хост что выше, то трафик идет по другому пути, он пожож, да не совсем:
+---
+
+Далее проверим как пойдет трафик если инициатор находится уже во втором сайте
 
 От лифа:
 
@@ -534,19 +803,15 @@ vrf context VRF_VPC_KEEPALIVE
 
 ![cod2-firewall](./images/DC2_to_DC1/2.png)
 
-Хотя тут очень странно показывает довольно на мой взляд.
-
-Между бордерами бежит в разнобой:
-
-В сторону ЦОД-1 в vrf `LABA`
+В сторону ЦОД-1 в vrf `TRANSIT`
 
 ![dc2bg-dc1bg](./images/DC2_to_DC1/3-1.png)
 
-Обратно в vrf `TRANSIT`:
+Обратно так-же в vrf `TRANSIT`:
 
 ![dc2bg-dc1bg_revers](./images/DC2_to_DC1/3-2.png)
 
-И до лифа от борера в первом ЦОД-е все так-же:
+И до лифа от борера в первом ЦОД-е все так-же, уже в своем "родном" vrf `LABA`:
 
 ![dc-leaf](./images/DC2_to_DC1/4-1.png)
 
@@ -554,9 +819,20 @@ vrf context VRF_VPC_KEEPALIVE
 
 ![dc-leaf](./images/DC2_to_DC1/4-2.png)
 
-Проект не без не недостатков, но рабочий.
+Проект не без недостатков, - лишние префиксы наводняют файрвол во втором цоде, и лиф в первом, но рабочий.
+
+>Так-же если в первом сайте локально сликать два vrf-а, то у них будет недоступен соседний vrf во втором сайте!
 
 ---
+
+Так-же у нас есть в схеме "фича", - если во втором сайте выключить полностью фаервол, то меж-vrf взайимодействие перейдет на фаервол в первом сайте!
+
+Вот как это будет выглядеть на фаерволе в первом сайте, если инициатор в первом сайте:
+
+![Инициатор во втором сайте](./images/fw2_off-i1.png)
+
+И если инициатор во втором:
+![Инициатор во втором сайте](./images/fw2_off-i2.png)
 
 Полные настройки коммутаторов:
 
@@ -1295,8 +1571,8 @@ Leaf-R2#
 C1L-Leaf-R3# sh run
 
 !Command: show running-config
-!Running configuration last done at: Wed Feb 12 11:34:18 2025
-!Time: Wed Feb 12 12:12:52 2025
+!Running configuration last done at: Sun Feb 16 23:49:37 2025
+!Time: Mon Feb 17 17:59:42 2025
 
 version 10.3(5) Bios:version  
 hostname C1L-Leaf-R3
@@ -1328,25 +1604,20 @@ rmon event 4 log trap public description WARNING(4) owner PMON@WARNING
 rmon event 5 log trap public description INFORMATION(5) owner PMON@INFO
 
 fabric forwarding anycast-gateway-mac 0001.0001.0001
-vlan 1,10,30,1010,1030,1050
+vlan 1,10,30,50,1010,1030
 vlan 10
   vn-segment 10000010
 vlan 30
   vn-segment 10000030
+vlan 50
+  vn-segment 10000050
 vlan 1010
   vn-segment 51010
 vlan 1030
   vn-segment 51030
-vlan 1050
-  vn-segment 51050
 
 ip as-path access-list BGP_ONLY_INTERNAL seq 1 permit "^$"
-ip as-path access-list bgpAsRemote seq 10 deny "^$"
-ip as-path access-list blockLocalFw seq 10 permit "^1111_"
 route-map RM_PERMIT_IPv4 permit 10
-route-map bgpLocal deny 10
-  match evpn route-type 5 
-route-map bgpLocal permit 100
 key chain ISIS
   key 1
     key-string 7 070c285f4d064b0916100a
@@ -1356,32 +1627,12 @@ vrf context DEMO
   address-family ipv4 unicast
     route-target both auto
     route-target both auto evpn
-    route-target import 50:11
-    route-target import 50:11 evpn
-    route-target export 101:51030
-    route-target export 101:51030 evpn
 vrf context LABA
   vni 51010
   rd auto
   address-family ipv4 unicast
     route-target both auto
     route-target both auto evpn
-    route-target import 50:11
-    route-target import 50:11 evpn
-    route-target export 101:51010
-    route-target export 101:51010 evpn
-vrf context TRANSIT
-  vni 51050
-  rd auto
-  address-family ipv4 unicast
-    route-target import 101:51010
-    route-target import 101:51010 evpn
-    route-target import 101:51030
-    route-target import 101:51030 evpn
-    route-target import 50:11
-    route-target import 50:11 evpn
-    route-target export 50:11
-    route-target export 50:11 evpn
 vrf context management
 hardware profile tcam resource template LEAF_TCAM_CARVE ref-template nfe
   racl 256
@@ -1411,7 +1662,7 @@ interface Vlan30
 interface Vlan1010
   description * L3VNI VRF LABA *
   no shutdown
-  mtu 9000
+  mtu 9216
   vrf member LABA
   no ip redirects
   ip forward
@@ -1420,17 +1671,8 @@ interface Vlan1010
 interface Vlan1030
   description * L3VNI VRF DEMO *
   no shutdown
-  mtu 9000
+  mtu 9216
   vrf member DEMO
-  no ip redirects
-  ip forward
-  no ipv6 redirects
-
-interface Vlan1050
-  description L3VNI for vrf TRANSIT
-  no shutdown
-  mtu 9000
-  vrf member TRANSIT
   no ip redirects
   ip forward
   no ipv6 redirects
@@ -1439,15 +1681,12 @@ interface nve1
   no shutdown
   host-reachability protocol bgp
   source-interface loopback2
+  global suppress-arp
+  global ingress-replication protocol bgp
   member vni 51010 associate-vrf
   member vni 51030 associate-vrf
-  member vni 51050 associate-vrf
   member vni 10000010
-    suppress-arp
-    ingress-replication protocol bgp
   member vni 10000030
-    suppress-arp
-    ingress-replication protocol bgp
 
 interface Ethernet1/1
   description to_spine_1
@@ -1483,10 +1722,12 @@ interface Ethernet1/4
 interface Ethernet1/5
   description *** to_HOST-R3 ***
   switchport access vlan 10
+  mtu 9216
 
 interface Ethernet1/6
   description *** to_HOST-R31 ***
   switchport access vlan 30
+  mtu 9216
 
 interface Ethernet1/7
   shutdown
@@ -1619,6 +1860,11 @@ interface loopback2
   description # VTEP-ID
   ip address 10.101.132.1/32
   ip router isis UNDERLAY
+
+interface loopback50
+  description Test for vrf TRANSIT
+  vrf member TRANSIT
+  ip address 101.102.4.4/32
 cli alias name wr copy run start
 cli alias name c conf term
 cli alias name sir show ip route
@@ -1666,13 +1912,10 @@ router bgp 65010
     address-family ipv4 unicast
       redistribute hmm route-map RM_PERMIT_IPv4
       redistribute direct route-map RM_PERMIT_IPv4
-  vrf TRANSIT
-    address-family ipv4 unicast
-      redistribute hmm route-map RM_PERMIT_IPv4
 
 
 
-C1L-Leaf-R3# 
+C1L-Leaf-R3#
 ```
 
 </details>
@@ -2656,8 +2899,8 @@ Spine-R2#
 C1L-Bgw-R1# sh run
 
 !Command: show running-config
-!Running configuration last done at: Wed Feb 12 12:42:19 2025
-!Time: Wed Feb 12 13:12:35 2025
+!Running configuration last done at: Mon Feb 17 16:13:42 2025
+!Time: Mon Feb 17 18:00:52 2025
 
 version 10.3(5) Bios:version  
 hostname C1L-Bgw-R1
@@ -2689,7 +2932,7 @@ rmon event 3 log trap public description ERROR(3) owner PMON@ERROR
 rmon event 4 log trap public description WARNING(4) owner PMON@WARNING
 rmon event 5 log trap public description INFORMATION(5) owner PMON@INFO
 
-fabric forwarding anycast-gateway-mac 0001.0001.0000
+fabric forwarding anycast-gateway-mac 0001.0001.0001
 vlan 1,10,20,30,50,60,1010,1030,1050,1060,1310,1330,1350
 vlan 10
   vn-segment 10000010
@@ -2718,49 +2961,73 @@ vlan 1350
 
 spanning-tree vlan 1-3967 priority 4096
 ip prefix-list bgp_only_host seq 10 permit 0.0.0.0/0 eq 32 
+ip prefix-list bgp_only_net seq 5 deny 0.0.0.0/0 
 ip prefix-list bgp_only_net seq 10 deny 0.0.0.0/0 eq 32 
-ip prefix-list bgp_only_net seq 20 permit 0.0.0.0/0 le 32 
+ip prefix-list bgp_only_net seq 20 permit 0.0.0.0/0 le 31 
+ip prefix-list only_32_prefix description Allow only client host ip as /32 prefix
+ip prefix-list only_32_prefix seq 10 permit 0.0.0.0/0 eq 32 
 ip prefix-list outbound-no-host description Allow only CIDR prefix send to router
 ip prefix-list outbound-no-host seq 10 deny 0.0.0.0/0 eq 32 
-ip prefix-list outbound-no-host seq 20 permit 0.0.0.0/0 le 32 
+ip prefix-list outbound-no-host seq 20 permit 0.0.0.0/0 le 31 
 ip as-path access-list BGP_ONLY_INTERNAL seq 1 permit "^$"
 ip as-path access-list bgp_trans_in seq 10 permit "_1111$"
 ip as-path access-list bgp_trans_out seq 10 permit "_2222$"
+ip as-path access-list only_extenal_as seq 10 permit "_2222$"
+route-map BGP_EXT_PREF permit 10
+  set local-preference 50
 route-map BGP_LOCAL_PREF permit 10
   set local-preference 100
 route-map RM-BGP-DIRECT permit 10
+route-map bgp_static_default permit 10
+  match tag 201 
+route-map bgp_trans_pref permit 10
+  set local-preference 50
+route-map only_32_prefix_external permit 10
+  match as-path only_extenal_as 
+  match ip address prefix-list only_32_prefix 
+route-map only_32_prefix_external deny 20
+  match as-path only_extenal_as 
+route-map only_32_prefix_external permit 50
+route-map only_32_prefix_to_transit permit 10
+  match ip address prefix-list only_32_prefix 
+  match evpn route-type 5 
+route-map only_ext32_prefix_from_transit permit 10
+  match ip address prefix-list only_32_prefix 
+  match evpn route-type 5 
 key chain ISIS
   key 1
     key-string 7 070c285f4d064b0916100a
     cryptographic-algorithm MD5
 vrf context DEMO
   vni 51030
+  ip route 0.0.0.0/0 172.24.1.6 name DefToFirewall tag 201 10
   rd auto
   address-family ipv4 unicast
     route-target both auto
     route-target both auto evpn
-    route-target export 101:30
-    route-target export 101:30 evpn
+    route-target import 65010:51050
+    route-target import 65010:51050 evpn
 vrf context LABA
   vni 51010
+  ip route 0.0.0.0/0 172.24.1.2 name DefToFirewall tag 201 10
   rd auto
   address-family ipv4 unicast
     route-target both auto
     route-target both auto evpn
-    route-target export 101:10
-    route-target export 101:10 evpn
+    route-target import 65010:51050
+    route-target import 65010:51050 evpn
 vrf context TRANSIT
   vni 51050
   rd auto
   address-family ipv4 unicast
     route-target both auto
     route-target both auto evpn
-    route-target import 101:51010
-    route-target import 101:51010 evpn
-    route-target import 101:51030
-    route-target import 101:51030 evpn
-    route-target export 50:11
-    route-target export 50:11 evpn
+    route-target import 65010:51010
+    route-target import 65010:51010 evpn
+    route-target import 65010:51030
+    route-target import 65010:51030 evpn
+    export map only_ext32_prefix_from_transit
+    import map only_32_prefix_to_transit
 vrf context VRF_VPC_KEEPALIVE
   address-family ipv4 unicast
 vrf context management
@@ -2776,7 +3043,7 @@ interface Vlan1
 interface Vlan1010
   description L3VNI for vrf LABA
   no shutdown
-  mtu 9000
+  mtu 9216
   vrf member LABA
   ip forward
   ipv6 forward
@@ -2784,7 +3051,7 @@ interface Vlan1010
 interface Vlan1030
   description L3VNI for vrf DEMO
   no shutdown
-  mtu 9000
+  mtu 9216
   vrf member DEMO
   ip forward
   ipv6 forward
@@ -2792,7 +3059,7 @@ interface Vlan1030
 interface Vlan1050
   description L3VNI for vrf TRANSIT
   no shutdown
-  mtu 9000
+  mtu 9216
   vrf member TRANSIT
   ip forward
   ipv6 forward
@@ -2828,6 +3095,7 @@ interface nve1
   member vni 10000010
     multisite ingress-replication
   member vni 10000020
+    multisite ingress-replication
   member vni 10000030
     multisite ingress-replication
 
@@ -2881,6 +3149,7 @@ interface Ethernet1/9
   description to_wan
   switchport mode trunk
   switchport trunk allowed vlan 1310,1330,1350
+  mtu 9216
   speed 1000
   duplex full
 
@@ -3016,7 +3285,7 @@ interface loopback2
 interface loopback50
   description * VRF TRANSIT *
   vrf member TRANSIT
-  ip address 10.101.8.8/32
+  ip address 10.101.8.9/32
 
 interface loopback100
   description Multi-Site VIP
@@ -3055,10 +3324,14 @@ router bgp 65010
     network 10.101.12.1/32
   template peer Firewall
     remote-as 1111
+    description Router as firewall
     timers 7 21
     address-family ipv4 unicast
       send-community
       send-community extended
+      prefix-list bgp_only_net in
+      filter-list BGP_ONLY_INTERNAL out
+    address-family l2vpn evpn
   template peer SPINES
     remote-as 65010
     update-source loopback2
@@ -3090,39 +3363,33 @@ router bgp 65010
   vrf DEMO
     router-id 172.24.1.5
     address-family ipv4 unicast
-      redistribute hmm route-map RM-BGP-DIRECT
+      redistribute static route-map bgp_static_default
+      default-information originate
     neighbor 172.24.1.6
       inherit peer Firewall
       description COD-1-Router
-      address-family ipv4 unicast
-        prefix-list bgp_only_net in
-        filter-list BGP_ONLY_INTERNAL out
-        route-map BGP_LOCAL_PREF in
   vrf LABA
     router-id 172.24.1.1
     address-family ipv4 unicast
-      redistribute hmm route-map RM-BGP-DIRECT
+      redistribute static route-map bgp_static_default
+      default-information originate
     neighbor 172.24.1.2
       inherit peer Firewall
       description COD-1-Router
-      address-family ipv4 unicast
-        prefix-list bgp_only_net in
-        filter-list BGP_ONLY_INTERNAL out
-        route-map BGP_LOCAL_PREF in
   vrf TRANSIT
     router-id 172.24.1.49
-    address-family ipv4 unicast
-      redistribute hmm route-map RM-BGP-DIRECT
     neighbor 172.24.1.50
-      inherit peer Firewall
+      remote-as 2222
+      timers 7 21
       address-family ipv4 unicast
+        send-community
+        send-community extended
         prefix-list bgp_only_host in
         filter-list bgp_trans_in in
-        filter-list bgp_trans_out out
 
 
 
-C1L-Bgw-R1# 
+C1L-Bgw-R1#
 ```
 
 </details>
@@ -3134,9 +3401,9 @@ C1L-Bgw-R1#
 Cod1-FW-R1#sh run br
 Building configuration...
 
-Current configuration : 5564 bytes
+Current configuration : 6560 bytes
 !
-! Last configuration change at 12:56:25 PRM Wed Feb 12 2025
+! Last configuration change at 14:54:00 PRM Mon Feb 17 2025
 !
 version 15.7
 service timestamps debug datetime msec
@@ -3148,6 +3415,11 @@ hostname Cod1-FW-R1
 boot-start-marker
 boot-end-marker
 !
+!
+vrf definition TRANSIT
+ !
+ address-family ipv4
+ exit-address-family
 !
 logging console errors
 !
@@ -3174,12 +3446,12 @@ no ip icmp rate-limit unreachable
 !
 !
 !
-!
-!
-
-
-!
 !         
+!
+
+
+!
+!
 !
 !
 no ip domain lookup
@@ -3220,6 +3492,16 @@ policy-map type inspect DEMO_TO_LABA
   inspect 
  class class-default
   drop log
+policy-map type inspect DEMO_TO_LABA_PMAP
+ class type inspect ALLVRF_CMAP
+  inspect 
+ class class-default
+  drop log
+policy-map type inspect LABA_TO_DEMO_PMAP
+ class type inspect ALLVRF_CMAP
+  inspect 
+ class class-default
+  drop log
 policy-map type inspect TRANSIT_PMAP
  class type inspect ALLVRF_CMAP
   inspect 
@@ -3245,9 +3527,9 @@ zone security TRANSIT
 zone security WAN
  description Internet
 zone-pair security LABA_TO_DEMO source LABA destination DEMO
- service-policy type inspect LABA_TO_DEMO
+ service-policy type inspect LABA_TO_DEMO_PMAP
 zone-pair security DEMO_TO_LABA source DEMO destination LABA
- service-policy type inspect DEMO_TO_LABA
+ service-policy type inspect DEMO_TO_LABA_PMAP
 zone-pair security LABA_TO_TRANSIT source LABA destination TRANSIT
  service-policy type inspect TRANSIT_PMAP
 zone-pair security DEMO_TO_TRANSIT source DEMO destination TRANSIT
@@ -3271,7 +3553,7 @@ zone-pair security DEMO_TO_WAN source DEMO destination WAN
 !
 !
 !
-!         
+!
 !
 interface Loopback1
  description Router-ID
@@ -3302,7 +3584,7 @@ interface Ethernet0/0.50
 !
 interface Ethernet0/1
  no ip address
- shutdown
+ shutdown 
  duplex auto
 !
 interface Ethernet0/2
@@ -3325,7 +3607,7 @@ interface Ethernet1/1
  no ip address
  shutdown
  duplex auto
-!
+!         
 interface Ethernet1/2
  no ip address
  shutdown
@@ -3341,19 +3623,25 @@ router bgp 1111
  neighbor 1.10.10.1 remote-as 1020
  neighbor 1.10.10.1 description FakeWAN
  neighbor 1.10.10.1 update-source Ethernet1/0
+ neighbor 1.10.10.1 timers 7 21
  neighbor 1.10.10.1 remove-private-as all replace-as
+ neighbor 1.10.10.1 prefix-list bgp_only_default in
+ neighbor 1.10.10.1 route-map bgp_extdef_prefer in
  neighbor 172.24.1.1 remote-as 65010
  neighbor 172.24.1.1 description BRD_Leaf_VRF_LABA
  neighbor 172.24.1.1 timers 7 21
  neighbor 172.24.1.1 send-community both
  neighbor 172.24.1.1 as-override
+ neighbor 172.24.1.1 prefix-list bgp_block_default in
  neighbor 172.24.1.5 remote-as 65010
  neighbor 172.24.1.5 description BRD_Leaf_VRF_DEMO
  neighbor 172.24.1.5 timers 7 21
  neighbor 172.24.1.5 send-community both
  neighbor 172.24.1.5 as-override
+ neighbor 172.24.1.5 prefix-list bgp_block_default in
  neighbor 172.24.1.49 remote-as 65010
  neighbor 172.24.1.49 description BRD_Leaf_VRF_TRANSIT
+ neighbor 172.24.1.49 shutdown
  neighbor 172.24.1.49 timers 7 21
  neighbor 172.24.1.49 send-community both
  neighbor 172.24.1.49 as-override
@@ -3376,10 +3664,19 @@ ip access-list extended TRACE
  permit icmp any any port-unreachable
  permit icmp any any ttl-exceeded
 !
+!
+ip prefix-list bgp_block_default description Block 0.0.0.0/0 only
+ip prefix-list bgp_block_default seq 5 deny 0.0.0.0/0
+ip prefix-list bgp_block_default seq 10 permit 0.0.0.0/0 le 32
+!
+ip prefix-list bgp_only_default seq 10 permit 0.0.0.0/0
 ipv6 ioam timestamp
 !
+route-map bgp_extdef_prefer permit 10
+ set local-preference 150
 !
 !
+!         
 control-plane
 !
 !
@@ -3421,12 +3718,12 @@ line vty 0 4
 !
 end
 
-Cod1-FW-R1#  
+Cod1-FW-R1#
 ```
 
----
-
 </details>
+
+---
 
 <details>
 <summary>Cod2-FW-R1</summary>
@@ -3435,9 +3732,7 @@ Cod1-FW-R1#
 Cod2-FW-R1#sh run br
 Building configuration...
 
-Current configuration : 6563 bytes
-!
-! Last configuration change at 13:19:32 PRM Wed Feb 12 2025
+Current configuration : 7082 bytes
 !
 version 15.7
 service timestamps debug datetime msec
@@ -3480,9 +3775,9 @@ no ip icmp rate-limit unreachable
 
 
 !
+!
+!
 !         
-!
-!
 no ip domain lookup
 ip cef
 login on-success log
@@ -3503,9 +3798,9 @@ object-group network RFC1918
  172.16.0.0 255.240.0.0
  10.0.0.0 255.0.0.0
 !
-!         
-redundancy
 !
+redundancy
+!         
 no cdp log mismatch duplex
 !
 ip tcp synwait-time 5
@@ -3517,17 +3812,27 @@ class-map type inspect match-all ALLVRF_CMAP
 class-map type inspect match-all ICMP_TRACE_CMAP
  match access-group name ICMP-TRACE
 !
-policy-map type inspect DEMO_TO_LABA
+policy-map type inspect DEMO_TO_TRANSIT_PMAP
  class type inspect ALLVRF_CMAP
   inspect 
  class class-default
   drop log
-policy-map type inspect VAGON_PMAP
+policy-map type inspect DEMO_TO_LABA_PMAP
  class type inspect ALLVRF_CMAP
   inspect 
  class class-default
   drop log
-policy-map type inspect TRANSIT_PMAP
+policy-map type inspect TRANSIT_TO_DEMO_PMAP
+ class type inspect ALLVRF_CMAP
+  inspect 
+ class class-default
+  drop log
+policy-map type inspect LABA_TO_DEMO_PMAP
+ class type inspect ALLVRF_CMAP
+  inspect 
+ class class-default
+  drop log
+policy-map type inspect DEMO_TRANSIT_PMAP
  class type inspect ALLVRF_CMAP
   inspect 
  class class-default
@@ -3537,7 +3842,12 @@ policy-map type inspect WAN_PMAP
   inspect 
  class class-default
   drop
-policy-map type inspect LABA_TO_DEMO
+policy-map type inspect TRANSIT_TO_LABA_PMAP
+ class type inspect ALLVRF_CMAP
+  inspect 
+ class class-default
+  drop log
+policy-map type inspect LABA_TRANSIT_PMAP
  class type inspect ALLVRF_CMAP
   inspect 
  class class-default
@@ -3547,32 +3857,22 @@ zone security LABA
  description For VRF LABA
 zone security DEMO
  description For VRF DEMO
-zone security VAGON
- description For VRF VAGON
 zone security TRANSIT
  description For VRF TRANSIT
 zone security WAN
  description Internet
 zone-pair security LABA_TO_DEMO source LABA destination DEMO
- service-policy type inspect LABA_TO_DEMO
+ service-policy type inspect LABA_TO_DEMO_PMAP
 zone-pair security DEMO_TO_LABA source DEMO destination LABA
- service-policy type inspect DEMO_TO_LABA
-zone-pair security VAGON_TO_LABA source VAGON destination LABA
- service-policy type inspect VAGON_PMAP
-zone-pair security VAGON_TO_DEMO source VAGON destination DEMO
- service-policy type inspect VAGON_PMAP
-zone-pair security DEMO_TO_VAGON source DEMO destination VAGON
- service-policy type inspect VAGON_PMAP
-zone-pair security LABA_TO_VAGON source LABA destination VAGON
- service-policy type inspect VAGON_PMAP
+ service-policy type inspect DEMO_TO_LABA_PMAP
 zone-pair security LABA_TO_TRANSIT source LABA destination TRANSIT
- service-policy type inspect TRANSIT_PMAP
+ service-policy type inspect LABA_TRANSIT_PMAP
 zone-pair security TRANSIT_TO_LABA source TRANSIT destination LABA
- service-policy type inspect TRANSIT_PMAP
+ service-policy type inspect TRANSIT_TO_LABA_PMAP
 zone-pair security DEMO_TO_TRANSIT source DEMO destination TRANSIT
- service-policy type inspect TRANSIT_PMAP
+ service-policy type inspect DEMO_TRANSIT_PMAP
 zone-pair security TRANSIT_TO_DEMO source TRANSIT destination DEMO
- service-policy type inspect TRANSIT_PMAP
+ service-policy type inspect TRANSIT_TO_DEMO_PMAP
 zone-pair security LABA_TO_WAN source LABA destination WAN
  service-policy type inspect WAN_PMAP
 zone-pair security DEMO_TO_WAN source DEMO destination WAN
@@ -3675,17 +3975,21 @@ router bgp 2222
  bgp log-neighbor-changes
  neighbor 1.20.20.1 remote-as 1020
  neighbor 1.20.20.1 description FakeWAN
- neighbor 1.10.10.1 update-source Ethernet1/0
- neighbor 1.10.10.1 remove-private-as all replace-as
- neighbor 1.20.20.1 shutdown
+ neighbor 1.20.20.1 update-source Ethernet1/0
+ neighbor 1.20.20.1 timers 7 21
+ neighbor 1.20.20.1 remove-private-as all replace-as
+ neighbor 1.20.20.1 prefix-list bgp_only_default in
+ neighbor 1.20.20.1 route-map bgp_extdef_prefer in
  neighbor 172.24.2.1 remote-as 65012
  neighbor 172.24.2.1 timers 7 21
  neighbor 172.24.2.1 send-community both
  neighbor 172.24.2.1 as-override
+ neighbor 172.24.2.1 prefix-list bgp_block_default in
  neighbor 172.24.2.5 remote-as 65012
  neighbor 172.24.2.5 timers 7 21
  neighbor 172.24.2.5 send-community both
  neighbor 172.24.2.5 as-override
+ neighbor 172.24.2.5 prefix-list bgp_block_default in
  neighbor 172.24.2.49 remote-as 65012
  neighbor 172.24.2.49 timers 7 21
  neighbor 172.24.2.49 send-community both
@@ -3712,8 +4016,17 @@ ip access-list extended ICMP-TRACE
 ip access-list extended TRACE
  permit icmp any any port-unreachable
  permit icmp any any ttl-exceeded
-!         
+!
+!
+ip prefix-list bgp_block_default description Block 0.0.0.0/0 only
+ip prefix-list bgp_block_default seq 5 deny 0.0.0.0/0
+ip prefix-list bgp_block_default seq 10 permit 0.0.0.0/0 le 32
+!
+ip prefix-list bgp_only_default seq 10 permit 0.0.0.0/0
 ipv6 ioam timestamp
+!
+route-map bgp_extdef_prefer permit 10
+ set local-preference 150
 !
 !
 !
@@ -3757,7 +4070,7 @@ line vty 0 4
 !
 !
 end
-          
+
 Cod2-FW-R1#
 ```
 
@@ -3767,15 +4080,15 @@ Cod2-FW-R1#
 <summary>C2L-Bgw-R1</summary>
 
 ```text
-C2L-BGW-R1# sh run
+C2L-Bgw-R1# sh run
 
 !Command: show running-config
-!Running configuration last done at: Wed Feb 12 11:48:32 2025
-!Time: Wed Feb 12 13:20:20 2025
+!Running configuration last done at: Mon Feb 17 16:14:21 2025
+!Time: Mon Feb 17 18:16:04 2025
 
 version 10.3(5) Bios:version  
-hostname C2L-BGW-R1
-vdc C2L-BGW-R1 id 1
+hostname C2L-Bgw-R1
+vdc C2L-Bgw-R1 id 1
   limit-resource vlan minimum 16 maximum 4094
   limit-resource vrf minimum 2 maximum 4096
   limit-resource port-channel minimum 0 maximum 511
@@ -3804,10 +4117,12 @@ rmon event 3 log trap public description ERROR(3) owner PMON@ERROR
 rmon event 4 log trap public description WARNING(4) owner PMON@WARNING
 rmon event 5 log trap public description INFORMATION(5) owner PMON@INFO
 
-fabric forwarding anycast-gateway-mac 0001.0001.0000
-vlan 1,10,30,50,60,1010,1030,1050,1310,1330,1350
+fabric forwarding anycast-gateway-mac 0001.0001.0001
+vlan 1,10,20,30,50,60,1010,1030,1050,1310,1330,1350
 vlan 10
   vn-segment 10000010
+vlan 20
+  vn-segment 10000020
 vlan 30
   vn-segment 10000030
 vlan 50
@@ -3829,8 +4144,11 @@ vlan 1350
 
 ip prefix-list bgp_only_host seq 10 permit 0.0.0.0/0 eq 32 
 ip prefix-list bgp_only_net description Allow only CIDR prefix
+ip prefix-list bgp_only_net seq 5 deny 0.0.0.0/0 
 ip prefix-list bgp_only_net seq 10 deny 0.0.0.0/0 eq 32 
-ip prefix-list bgp_only_net seq 20 permit 0.0.0.0/0 le 32 
+ip prefix-list bgp_only_net seq 20 permit 0.0.0.0/0 le 31 
+ip prefix-list only_32_prefix description Allow only client host ip as /32 prefix
+ip prefix-list only_32_prefix seq 10 permit 0.0.0.0/0 eq 32 
 ip prefix-list outbound-no-host description Allow only CIDR prefix send to router
 ip prefix-list outbound-no-host seq 10 deny 0.0.0.0/0 eq 32 
 ip prefix-list outbound-no-host seq 20 permit 0.0.0.0/0 le 32 
@@ -3842,37 +4160,38 @@ route-map BGP_LOCAL_PREF permit 10
 route-map BGP_NO_PREF permit 10
   set local-preference 50
 route-map RM-BGP-DIRECT permit 10
+route-map bgp_static_default permit 10
+  match tag 202 
+route-map only_32_prefix_to_transit permit 10
+  match ip address prefix-list only_32_prefix 
+route-map only_ext32_prefix_from_transit permit 10
+  match ip address prefix-list only_32_prefix 
+  match evpn route-type 5 
 key chain ISIS
   key 1
     key-string 7 072c0e681c
 vrf context DEMO
   vni 51030
+  ip route 0.0.0.0/0 172.24.2.6 name DefToFirewall tag 202 240
   rd auto
   address-family ipv4 unicast
     route-target both auto
     route-target both auto evpn
-    route-target export 102:30
-    route-target export 102:30 evpn
 vrf context LABA
   vni 51010
+  ip route 0.0.0.0/0 172.24.2.2 name DefToFirewall tag 202 240
   rd auto
   address-family ipv4 unicast
     route-target both auto
     route-target both auto evpn
-    route-target export 102:10
-    route-target export 102:10 evpn
 vrf context TRANSIT
   vni 51050
   rd auto
   address-family ipv4 unicast
     route-target both auto
     route-target both auto evpn
-    route-target import 102:51010
-    route-target import 102:51010 evpn
-    route-target import 102:51030
-    route-target import 102:51030 evpn
-    route-target export 50:12
-    route-target export 50:12 evpn
+    export map only_ext32_prefix_from_transit
+    import map only_32_prefix_to_transit
 vrf context management
 hardware profile tcam resource template LEAF_TCAM_CARVE ref-template nfe
   racl 256
@@ -3886,7 +4205,7 @@ interface Vlan1
 interface Vlan1010
   description L3VNI for vrf LABA
   no shutdown
-  mtu 9000
+  mtu 9216
   vrf member LABA
   ip forward
   ipv6 forward
@@ -3894,7 +4213,7 @@ interface Vlan1010
 interface Vlan1030
   description L3VNI for vrf DEMO
   no shutdown
-  mtu 9000
+  mtu 9216
   vrf member DEMO
   ip forward
   ipv6 forward
@@ -3902,7 +4221,7 @@ interface Vlan1030
 interface Vlan1050
   description L3VNI for vrf TRANSIT
   no shutdown
-  mtu 9000
+  mtu 9216
   vrf member TRANSIT
   ip forward
   ipv6 forward
@@ -3910,6 +4229,7 @@ interface Vlan1050
 interface Vlan1310
   description Tranfer VL10 and VL20 to Router
   no shutdown
+  mtu 9100
   vrf member LABA
   ip address 172.24.2.1/30
   ipv6 address use-link-local-only
@@ -3917,6 +4237,7 @@ interface Vlan1310
 interface Vlan1330
   description Tranfer VL30 to Router
   no shutdown
+  mtu 9100
   vrf member DEMO
   ip address 172.24.2.5/30
   ipv6 address use-link-local-only
@@ -3924,6 +4245,7 @@ interface Vlan1330
 interface Vlan1350
   description # VL50 to Router
   no shutdown
+  mtu 9100
   vrf member TRANSIT
   ip address 172.24.2.49/30
   ipv6 address use-link-local-only
@@ -3939,6 +4261,8 @@ interface nve1
   member vni 51030 associate-vrf
   member vni 51050 associate-vrf
   member vni 10000010
+    multisite ingress-replication
+  member vni 10000020
     multisite ingress-replication
   member vni 10000030
     multisite ingress-replication
@@ -3993,6 +4317,7 @@ interface Ethernet1/9
   description to_wan
   switchport mode trunk
   switchport trunk allowed vlan 1310,1330,1350
+  mtu 9216
   speed 1000
   duplex full
 
@@ -4122,7 +4447,7 @@ interface loopback2
 interface loopback50
   description test vrf TRANSIT
   vrf member TRANSIT
-  ip address 10.102.8.8/32
+  ip address 10.102.8.10/32
 
 interface loopback100
   description Multi-Site VIP
@@ -4164,6 +4489,8 @@ router bgp 65012
     address-family ipv4 unicast
       send-community
       send-community extended
+      prefix-list bgp_only_net in
+      filter-list BGP_ONLY_INTERNAL out
   template peer SPINES
     remote-as 65012
     update-source loopback2
@@ -4191,37 +4518,31 @@ router bgp 65012
   vrf DEMO
     router-id 172.24.2.5
     address-family ipv4 unicast
-      redistribute direct route-map RM-BGP-DIRECT
+      redistribute static route-map bgp_static_default
+      default-information originate
     neighbor 172.24.2.6
       inherit peer Firewall
-      address-family ipv4 unicast
-        prefix-list bgp_only_net in
-        filter-list BGP_ONLY_INTERNAL out
-        route-map BGP_LOCAL_PREF in
   vrf LABA
     router-id 172.24.2.1
     address-family ipv4 unicast
-      redistribute direct route-map RM-BGP-DIRECT
+      redistribute static route-map bgp_static_default
+      default-information originate
     neighbor 172.24.2.2
       inherit peer Firewall
-      address-family ipv4 unicast
-        prefix-list bgp_only_net in
-        filter-list BGP_ONLY_INTERNAL out
-        route-map BGP_LOCAL_PREF in
   vrf TRANSIT
     router-id 172.24.2.49
     address-family ipv4 unicast
-      redistribute direct route-map RM-BGP-DIRECT
     neighbor 172.24.2.50
-      inherit peer Firewall
+      remote-as 2222
       address-family ipv4 unicast
+        send-community
+        send-community extended
         prefix-list bgp_only_host in
         filter-list bgp_trans_in in
-        filter-list bgp_trans_out out
 
 
 
-C2L-BGW-R1#
+C2L-Bgw-R1#
 ```
 
 </details>
@@ -4503,8 +4824,8 @@ C2L-Spine-R1#
 C2L-Leaf-R1# sh run
 
 !Command: show running-config
-!Running configuration last done at: Wed Feb 12 11:52:18 2025
-!Time: Wed Feb 12 13:22:18 2025
+!Running configuration last done at: Sun Feb 16 21:13:55 2025
+!Time: Mon Feb 17 18:06:37 2025
 
 version 10.3(5) Bios:version  
 hostname C2L-Leaf-R1
@@ -4617,7 +4938,7 @@ interface Vlan30
 interface Vlan1010
   description L3VNI for vrf LABA
   no shutdown
-  mtu 9000
+  mtu 9216
   vrf member LABA
   ip forward
   ipv6 forward
@@ -4625,7 +4946,7 @@ interface Vlan1010
 interface Vlan1030
   description L3VNI for vrf DEMO
   no shutdown
-  mtu 9000
+  mtu 9216
   vrf member DEMO
   ip forward
   ipv6 forward
@@ -4633,7 +4954,7 @@ interface Vlan1030
 interface Vlan1050
   description L3VNI for vrf TRANSIT
   no shutdown
-  mtu 9000
+  mtu 9216
   vrf member TRANSIT
   ip forward
   ipv6 forward
@@ -4681,12 +5002,14 @@ interface Ethernet1/4
 interface Ethernet1/5
   description to_COD2-HOST1
   switchport access vlan 10
+  mtu 9216
   speed 1000
   duplex full
 
 interface Ethernet1/6
   description to_COD2-HOST2
   switchport access vlan 30
+  mtu 9216
   speed 1000
   duplex full
 
