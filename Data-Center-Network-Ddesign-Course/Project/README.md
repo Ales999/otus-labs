@@ -664,7 +664,7 @@ router bgp 65010
   vrf TRANSIT
     router-id 172.24.1.49
     neighbor 172.24.1.50
-      remote-as 2222
+      remote-as 1111
       timers 7 21
       address-family ipv4 unicast
         send-community
@@ -3379,7 +3379,7 @@ router bgp 65010
   vrf TRANSIT
     router-id 172.24.1.49
     neighbor 172.24.1.50
-      remote-as 2222
+      remote-as 1111
       timers 7 21
       address-family ipv4 unicast
         send-community
