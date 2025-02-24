@@ -7591,3 +7591,85 @@ C2L-Bgw-R1#
 ```
 
 </details>
+
+---
+
+### Cisco EEM
+
+C2-Bgw-R1# sh file bootflash:firewall_off.py
+
+```py
+#!/isan/bin/python3
+from cli import *
+#
+cli('conf t ; vrf context DEMO ; address-family ipv4 unicast ; route-target import 65012:51010 ; route-target import 65012:51010 evpn')
+cli('conf t ; vrf context DEMO ; address-family ipv4 unicast ; route-target import 65012:51080 ; route-target import 65012:51080 evpn')
+#
+cli('conf t ; vrf context LABA ; address-family ipv4 unicast ; route-target import 65012:51030 ; route-target import 65012:51030 evpn')
+cli('conf t ; vrf context LABA ; address-family ipv4 unicast ; route-target import 65012:51080 ; route-target import 65012:51080 evpn')
+#
+cli('conf t ; vrf context PROD ; address-family ipv4 unicast ; route-target import 65012:51010 ; route-target import 65012:51010 evpn')
+cli('conf t ; vrf context PROD ; address-family ipv4 unicast ; route-target import 65012:51030 ; route-target import 65012:51030 evpn')
+#
+cli('conf t ; vrf context TRANSIT ; address-family ipv4 unicast ; route-target import 65012:51010 ; route-target import 65012:51010 evpn')
+cli('conf t ; vrf context TRANSIT ; address-family ipv4 unicast ; route-target import 65012:51030 ; route-target import 65012:51030 evpn')
+cli('conf t ; vrf context TRANSIT ; address-family ipv4 unicast ; route-target import 65012:51080 ; route-target import 65012:51080 evpn')
+```
+
+C2-Bgw-R1# sh file bootflash:firewall_on.py
+
+```py
+#!/isan/bin/python3
+from cli import *
+#
+cli('conf t ; vrf context DEMO ; address-family ipv4 unicast ; no route-target import 65012:51010 ; no route-target import 65012:51010 evpn')
+cli('conf t ; vrf context DEMO ; address-family ipv4 unicast ; no route-target import 65012:51080 ; no route-target import 65012:51080 evpn')
+#
+cli('conf t ; vrf context LABA ; address-family ipv4 unicast ; no route-target import 65012:51030 ; no route-target import 65012:51030 evpn')
+cli('conf t ; vrf context LABA ; address-family ipv4 unicast ; no route-target import 65012:51080 ; no route-target import 65012:51080 evpn')
+#
+cli('conf t ; vrf context PROD ; address-family ipv4 unicast ; no route-target import 65012:51010 ; no route-target import 65012:51010 evpn')
+cli('conf t ; vrf context PROD ; address-family ipv4 unicast ; no route-target import 65012:51030 ; no route-target import 65012:51030 evpn')
+#
+cli('conf t ; vrf context TRANSIT ; address-family ipv4 unicast ; no route-target import 65012:51010 ; no route-target import 65012:51010 evpn')
+cli('conf t ; vrf context TRANSIT ; address-family ipv4 unicast ; no route-target import 65012:51030 ; no route-target import 65012:51030 evpn')
+cli('conf t ; vrf context TRANSIT ; address-family ipv4 unicast ; no route-target import 65012:51080 ; no route-target import 65012:51080 evpn')
+```
+
+> Для `event none` нужна фича `evmed`
+
+```text
+feature bash-shell
+feature evmed
+```
+
+```text
+!Command: show running-config eem
+!Running configuration last done at: Mon Feb 24 03:58:05 2025
+!Time: Mon Feb 24 15:19:10 2025
+
+version 10.3(5) Bios:version  
+event manager applet FW_OFF
+  description "Bypass Firewall with VRF Leaking"
+  event none
+  action 1.0 syslog priority notifications msg Start Bypass firewall
+  action 2.0 cli local python3 bootflash:firewall_off.py
+  action 3.0 cli local exit
+event manager applet FW_ON
+  description "Enable Firewall"
+  event none
+  action 1.0 syslog priority notifications msg Start transit with Firewall
+  action 2.0 cli local python3 bootflash:firewall_on.py
+  action 3.0 cli local exit
+
+
+C2-Bgw-R1# 
+```
+
+Редактировать файлы локально на флешке:
+
+```text
+C2-Bgw-R1# run bash
+$ export TERM=ansi
+$ vi /bootflash/firewall_off.py
+```
