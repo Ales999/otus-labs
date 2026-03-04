@@ -248,17 +248,17 @@ fabric forwarding anycast-gateway-mac 0001.0001.0001
 ```text
 C1L-Bgw-R1# conf t
 C1L-Bgw-R1(config)# evpn multisite border-gateway 10
-C1L-Bgw-R1(config)# 
+C1L-Bgw-R1(config)#
 C1L-Bgw-R1(config)# interface loopback100
 C1L-Bgw-R1(config-if)# description Multi-Site VIP
 C1L-Bgw-R1(config-if)# ip address 10.101.0.1/32
 C1L-Bgw-R1(config-if)# ip router isis UNDERLAY
 C1L-Bgw-R1(config-if)# exit
-C1L-Bgw-R1(config)# 
+C1L-Bgw-R1(config)#
 C1L-Bgw-R1(config)# interface nve1
 C1L-Bgw-R1(config-if-nve)# multisite border-gateway interface loopback100
 C1L-Bgw-R1(config-if-nve)# exit
-C1L-Bgw-R1(config)# 
+C1L-Bgw-R1(config)#
 ```
 
 В ЦОД-2 (Внимание -это приводит к остановке интерфейса NVE1!):
@@ -266,17 +266,17 @@ C1L-Bgw-R1(config)#
 ```text
 C2L-Bgw-R1# conf t
 C2L-Bgw-R1(config)# evpn multisite border-gateway 20
-C2L-Bgw-R1(config)# 
+C2L-Bgw-R1(config)#
 C2L-Bgw-R1(config)# interface loopback100
 C2L-Bgw-R1(config-if)# description Multi-Site VIP
 C2L-Bgw-R1(config-if)# ip address 10.102.0.1/32
 C2L-Bgw-R1(config-if)# ip router isis UNDERLAY
 C2L-Bgw-R1(config-if)# exit
-C2L-Bgw-R1(config)# 
+C2L-Bgw-R1(config)#
 C2L-Bgw-R1(config)# interface nve1
 C2L-Bgw-R1(config-if-nve)# multisite border-gateway interface loopback100
 C2L-Bgw-R1(config-if-nve)# exit
-C2L-Bgw-R1(config)# 
+C2L-Bgw-R1(config)#
 ```
 
 Настроим передачу Loopback-ков, для этого используем всё тот-же eBGP (на примере ЦОД-1):
@@ -296,7 +296,7 @@ C1L-Bgw-R1(config-if)# isis shutdown
 C1L-Bgw-R1(config-if)# evpn multisite dci-tracking
 C1L-Bgw-R1(config-if)# no shutdown
 C1L-Bgw-R1(config-if)# exit
-C1L-Bgw-R1(config)# 
+C1L-Bgw-R1(config)#
 C1L-Bgw-R1(config)# router bgp 65010
 C1L-Bgw-R1(config-router)# address-family ipv4 unicast
 C1L-Bgw-R1(config-router-af)# network 10.101.0.1/32
@@ -312,7 +312,7 @@ C1L-Bgw-R1(config-router-neighbor)# address-family ipv4 unicast
 C1L-Bgw-R1(config-router-neighbor-af)# exit
 C1L-Bgw-R1(config-router-neighbor)# exit
 C1L-Bgw-R1(config-router)# exit
-C1L-Bgw-R1(config)# 
+C1L-Bgw-R1(config)#
 ```
 
 Проверяем что все верно настроено, - есть связность и IP лупбэков передаются:
@@ -320,15 +320,15 @@ C1L-Bgw-R1(config)#
 ```text
 C1L-Bgw-R1# sh ip bgp summary | b Neighbor
 Neighbor        V    AS    MsgRcvd    MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
-50.0.0.3        4 65012      11539      11538       16    0    0 22:25:33 3         
-C1L-Bgw-R1# 
+50.0.0.3        4 65012      11539      11538       16    0    0 22:25:33 3
+C1L-Bgw-R1#
 C1L-Bgw-R1# sh ip bgp neighbors 50.0.0.3 advertised-routes | b Network
    Network            Next Hop            Metric     LocPrf     Weight Path
 *>l10.101.0.1/32      0.0.0.0                           100      32768 i
 *>l10.101.11.1/32     0.0.0.0                           100      32768 i
 *>l10.101.12.1/32     0.0.0.0                           100      32768 i
 
-C1L-Bgw-R1# 
+C1L-Bgw-R1#
 ```
 
 Если всё успешно, то настроим уже сам Multi-Site, который нам будет передавать в качестве пятого типа свои маршруты,
@@ -336,7 +336,7 @@ C1L-Bgw-R1#
  таким образом мы будем полностью изолированы от соседнего сайта(ов).
 
 ```text
-C1L-Bgw-R1(config)# 
+C1L-Bgw-R1(config)#
 C1L-Bgw-R1(config)# router bgp 65010
 C1L-Bgw-R1(config-router)# neighbor 10.102.0.1
 C1L-Bgw-R1(config-router-neighbor)# remote-as 65012
@@ -362,9 +362,9 @@ C1L-Bgw-R1(config)#
 ```text
 C1L-Bgw-R1(config)# sh bgp l2vpn evpn summary | i 10.102.0.1
 
-10.102.0.1      4 65012       1478       1373      836    0    0 04:41:49 24        
-10.102.0.1      E 65012 24         7          3          0          14        
-C1L-Bgw-R1(config)# 
+10.102.0.1      4 65012       1478       1373      836    0    0 04:41:49 24
+10.102.0.1      E 65012 24         7          3          0          14
+C1L-Bgw-R1(config)#
 ```
 
 И проверим например маршруты Type-2 которые мы от него получили:
@@ -431,23 +431,23 @@ vrf context TRANSIT
 Решение - отфильтровать `import` для получения только Type-5 маршрута:
 
 ```text
-C1L-Bgw-R1# 
+C1L-Bgw-R1#
 C1L-Bgw-R1# conf t
 Enter configuration commands, one per line. End with CNTL/Z.
-C1L-Bgw-R1(config)# 
+C1L-Bgw-R1(config)#
 C1L-Bgw-R1(config)# ip prefix-list only_32_prefix description Allow only client host ip as /32 prefix
 C1L-Bgw-R1(config)# ip prefix-list only_32_prefix seq 10 permit 0.0.0.0/0 eq 32
-C1L-Bgw-R1(config)# 
+C1L-Bgw-R1(config)#
 C1L-Bgw-R1(config)# route-map only_32_prefix_to_transit permit 10
 C1L-Bgw-R1(config-route-map)# match ip address prefix-list only_32_prefix
 C1L-Bgw-R1(config-route-map)# match evpn route-type 5
 C1L-Bgw-R1(config-route-map)# exit
-C1L-Bgw-R1(config)# 
+C1L-Bgw-R1(config)#
 C1L-Bgw-R1(config)# vrf context TRANSIT
 C1L-Bgw-R1(config-vrf)# address-family ipv4 unicast
 C1L-Bgw-R1(config-vrf-af-ipv4)# import map only_32_prefix_to_transit
 C1L-Bgw-R1(config-vrf-af-ipv4)# end
-C1L-Bgw-R1# 
+C1L-Bgw-R1#
 ```
 
 В итоге у нас остается только маршрут изученный по HMM на лифе, который и стал там `Type-5`:
@@ -461,14 +461,14 @@ C1L-Bgw-R1(config)# c
 C1L-Bgw-R1(config)# vrf context DEMO
 C1L-Bgw-R1(config-vrf)# address-family ipv4 unicast
 C1L-Bgw-R1(config-vrf-af-ipv4)# route-target import 65010:51050
-C1L-Bgw-R1(config-vrf-af-ipv4)# route-target import 65010:51050 evpn 
+C1L-Bgw-R1(config-vrf-af-ipv4)# route-target import 65010:51050 evpn
 C1L-Bgw-R1(config-vrf-af-ipv4)# exit
 C1L-Bgw-R1(config-vrf)# exit
-C1L-Bgw-R1(config)# 
+C1L-Bgw-R1(config)#
 C1L-Bgw-R1(config)# vrf context LABA
 C1L-Bgw-R1(config-vrf)# address-family ipv4 unicast
 C1L-Bgw-R1(config-vrf-af-ipv4)# route-target import 65010:51050
-C1L-Bgw-R1(config-vrf-af-ipv4)# route-target import 65010:51050 evpn 
+C1L-Bgw-R1(config-vrf-af-ipv4)# route-target import 65010:51050 evpn
 C1L-Bgw-R1(config-vrf-af-ipv4)# exit
 C1L-Bgw-R1(config-vrf)# exit
 C1L-Bgw-R1(config)#
@@ -477,13 +477,13 @@ C1L-Bgw-R1(config)#
 ... но фильтрацию на этот `route-target import`, повесим уже на vrf `TRANSIT` как `export map`! (он так-же сработает и на отправку в другой сайт):
 
 ```text
-C1L-Bgw-R1(config)# 
+C1L-Bgw-R1(config)#
 C1L-Bgw-R1(config)# route-map only_ext32_prefix_from_transit permit 10
 C1L-Bgw-R1(config-route-map)# match ip address prefix-list only_32_prefix
 C1L-Bgw-R1(config-route-map)# match evpn route-type 5
 C1L-Bgw-R1(config-route-map)# exit
-C1L-Bgw-R1(config)# 
-C1L-Bgw-R1(config)# 
+C1L-Bgw-R1(config)#
+C1L-Bgw-R1(config)#
 C1L-Bgw-R1(config)# vrf context TRANSIT
 C1L-Bgw-R1(config-vrf)#  address-family ipv4 unicast
 C1L-Bgw-R1(config-vrf-af-ipv4)# export map only_ext32_prefix_from_transit
@@ -496,7 +496,7 @@ C1L-Bgw-R1(config)#
  и next-hop у него в vrf TRANSIT бордера во втором-же сайте:
 
 ```text
-Cod2-FW-R1#sh ip route 172.24.10.30 
+Cod2-FW-R1#sh ip route 172.24.10.30
 Routing entry for 172.24.10.30/32
   Known via "bgp 2222", distance 20, metric 0
   Tag 65012, type external
@@ -512,7 +512,7 @@ Cod2-FW-R1#sh ip bgp 172.24.10.30/32
 BGP routing table entry for 172.24.10.30/32, version 14
 Paths: (1 available, best #1, table default)
   Advertised to update-groups:
-     5          8         
+     5          8
   Refresh Epoch 1
   65012 65010
     172.24.2.49 from 172.24.2.49 (172.24.2.49)
@@ -671,7 +671,7 @@ router bgp 65010
         send-community extended
         prefix-list bgp_only_host in
         filter-list bgp_trans_in in
-C1L-Bgw-R1# 
+C1L-Bgw-R1#
 ```
 
 И BGP на **втором** сайте:
@@ -852,7 +852,7 @@ Leaf-R1# sh run
 !Running configuration last done at: Thu Jan 30 13:35:36 2025
 !Time: Thu Jan 30 16:21:07 2025
 
-version 9.3(8) Bios:version  
+version 9.3(8) Bios:version
 hostname Leaf-R1
 vdc Leaf-R1 id 1
   limit-resource vlan minimum 16 maximum 4094
@@ -1161,10 +1161,10 @@ icam monitor scale
 cli alias name wr copy run start
 cli alias name c conf term
 cli alias name sir show ip route
-cli alias name cef show forwarding ipv4 
+cli alias name cef show forwarding ipv4
 cli alias name adj show ip adj
 cli alias name srr sh run | sec router
-cli alias name hi sh cli history unformatted 
+cli alias name hi sh cli history unformatted
 line console
   exec-timeout 0
   terminal length 48
@@ -1223,7 +1223,7 @@ Leaf-R2# sh run
 !Running configuration last done at: Thu Jan 30 13:35:32 2025
 !Time: Thu Jan 30 16:21:45 2025
 
-version 9.3(8) Bios:version  
+version 9.3(8) Bios:version
 hostname Leaf-R2
 vdc Leaf-R2 id 1
   limit-resource vlan minimum 16 maximum 4094
@@ -1564,7 +1564,7 @@ router bgp 65010
 
 
 
-Leaf-R2# 
+Leaf-R2#
 ```
 
 </details>
@@ -1579,7 +1579,7 @@ C1L-Leaf-R3# sh run
 !Running configuration last done at: Sun Feb 16 23:49:37 2025
 !Time: Mon Feb 17 17:59:42 2025
 
-version 10.3(5) Bios:version  
+version 10.3(5) Bios:version
 hostname C1L-Leaf-R3
 vdc C1L-Leaf-R3 id 1
   limit-resource vlan minimum 16 maximum 4094
@@ -1881,7 +1881,7 @@ line console
   terminal length 40
   terminal width  168
 line vty
-boot nxos bootflash:/nxos64-cs-lite.10.3.5.M.bin 
+boot nxos bootflash:/nxos64-cs-lite.10.3.5.M.bin
 router isis UNDERLAY
   net 49.0001.0101.0113.1001.00
   log-adjacency-changes
@@ -1935,7 +1935,7 @@ C1L-Leaf-R4# sh run
 !Running configuration last done at: Wed Feb 12 12:13:32 2025
 !Time: Wed Feb 12 12:15:31 2025
 
-version 10.3(5) Bios:version  
+version 10.3(5) Bios:version
 hostname C1L-Leaf-R4
 vdc C1L-Leaf-R4 id 1
   limit-resource vlan minimum 16 maximum 4094
@@ -2247,7 +2247,7 @@ line console
   terminal length 40
   terminal width  168
 line vty
-boot nxos bootflash:/nxos64-cs-lite.10.3.5.M.bin 
+boot nxos bootflash:/nxos64-cs-lite.10.3.5.M.bin
 router isis UNDERLAY
   net 49.0001.0101.0114.1001.00
   log-adjacency-changes
@@ -2284,7 +2284,7 @@ router bgp 65010
 
 
 
-C1L-Leaf-R4#  
+C1L-Leaf-R4#
 ```
 
 </details>
@@ -2299,7 +2299,7 @@ C1-Spine-R1# sh run
 !Running configuration last done at: Tue Feb 11 17:49:49 2025
 !Time: Wed Feb 12 13:10:31 2025
 
-version 10.3(5) Bios:version  
+version 10.3(5) Bios:version
 hostname C1-Spine-R1
 vdc C1-Spine-R1 id 1
   limit-resource vlan minimum 16 maximum 4094
@@ -2530,7 +2530,7 @@ interface loopback2
 cli alias name wr copy run start
 cli alias name c conf term
 cli alias name sir show ip route
-cli alias name cef show forwarding ipv4 
+cli alias name cef show forwarding ipv4
 cli alias name adj show ip adj
 cli alias name hash show routing hash
 cli alias name fadj show forwarding adjacency
@@ -2540,7 +2540,7 @@ line console
   terminal length 40
   terminal width  168
 line vty
-boot nxos bootflash:/nxos64-cs-lite.10.3.5.M.bin 
+boot nxos bootflash:/nxos64-cs-lite.10.3.5.M.bin
 router isis UNDERLAY
   net 49.0001.0101.0121.1001.00
   set-overload-bit on-startup 20
@@ -2583,7 +2583,7 @@ router bgp 65010
 
 
 
-C1-Spine-R1# 
+C1-Spine-R1#
 ```
 
 </details>
@@ -2598,7 +2598,7 @@ Spine-R2# sh run
 !Running configuration last done at: Wed Feb 12 07:34:06 2025
 !Time: Wed Feb 12 08:15:39 2025
 
-version 9.3(8) Bios:version  
+version 9.3(8) Bios:version
 hostname Spine-R2
 vdc Spine-R2 id 1
   limit-resource vlan minimum 16 maximum 4094
@@ -2842,7 +2842,7 @@ icam monitor scale
 cli alias name wr copy run start
 cli alias name c conf term
 cli alias name sir show ip route
-cli alias name cef show forwarding ipv4 
+cli alias name cef show forwarding ipv4
 cli alias name adj show ip adj
 cli alias name hash show routing hash
 cli alias name fadj show forwarding adjacency
@@ -2892,7 +2892,7 @@ router bgp 65010
 
 
 
-Spine-R2# 
+Spine-R2#
 ```
 
 </details>
@@ -2907,7 +2907,7 @@ C1L-Bgw-R1# sh run
 !Running configuration last done at: Mon Feb 17 16:13:42 2025
 !Time: Mon Feb 17 18:00:52 2025
 
-version 10.3(5) Bios:version  
+version 10.3(5) Bios:version
 hostname C1L-Bgw-R1
 vdc C1L-Bgw-R1 id 1
   limit-resource vlan minimum 16 maximum 4094
@@ -2965,15 +2965,15 @@ vlan 1350
   name VL50TOROUTER
 
 spanning-tree vlan 1-3967 priority 4096
-ip prefix-list bgp_only_host seq 10 permit 0.0.0.0/0 eq 32 
-ip prefix-list bgp_only_net seq 5 deny 0.0.0.0/0 
-ip prefix-list bgp_only_net seq 10 deny 0.0.0.0/0 eq 32 
-ip prefix-list bgp_only_net seq 20 permit 0.0.0.0/0 le 31 
+ip prefix-list bgp_only_host seq 10 permit 0.0.0.0/0 eq 32
+ip prefix-list bgp_only_net seq 5 deny 0.0.0.0/0
+ip prefix-list bgp_only_net seq 10 deny 0.0.0.0/0 eq 32
+ip prefix-list bgp_only_net seq 20 permit 0.0.0.0/0 le 31
 ip prefix-list only_32_prefix description Allow only client host ip as /32 prefix
-ip prefix-list only_32_prefix seq 10 permit 0.0.0.0/0 eq 32 
+ip prefix-list only_32_prefix seq 10 permit 0.0.0.0/0 eq 32
 ip prefix-list outbound-no-host description Allow only CIDR prefix send to router
-ip prefix-list outbound-no-host seq 10 deny 0.0.0.0/0 eq 32 
-ip prefix-list outbound-no-host seq 20 permit 0.0.0.0/0 le 31 
+ip prefix-list outbound-no-host seq 10 deny 0.0.0.0/0 eq 32
+ip prefix-list outbound-no-host seq 20 permit 0.0.0.0/0 le 31
 ip as-path access-list BGP_ONLY_INTERNAL seq 1 permit "^$"
 ip as-path access-list bgp_trans_in seq 10 permit "_1111$"
 ip as-path access-list bgp_trans_out seq 10 permit "_2222$"
@@ -2984,21 +2984,21 @@ route-map BGP_LOCAL_PREF permit 10
   set local-preference 100
 route-map RM-BGP-DIRECT permit 10
 route-map bgp_static_default permit 10
-  match tag 201 
+  match tag 201
 route-map bgp_trans_pref permit 10
   set local-preference 50
 route-map only_32_prefix_external permit 10
-  match as-path only_extenal_as 
-  match ip address prefix-list only_32_prefix 
+  match as-path only_extenal_as
+  match ip address prefix-list only_32_prefix
 route-map only_32_prefix_external deny 20
-  match as-path only_extenal_as 
+  match as-path only_extenal_as
 route-map only_32_prefix_external permit 50
 route-map only_32_prefix_to_transit permit 10
-  match ip address prefix-list only_32_prefix 
-  match evpn route-type 5 
+  match ip address prefix-list only_32_prefix
+  match evpn route-type 5
 route-map only_ext32_prefix_from_transit permit 10
-  match ip address prefix-list only_32_prefix 
-  match evpn route-type 5 
+  match ip address prefix-list only_32_prefix
+  match evpn route-type 5
 key chain ISIS
   key 1
     key-string 7 070c285f4d064b0916100a
@@ -3300,7 +3300,7 @@ cli alias name wr copy run start
 cli alias name c conf term
 cli alias name sir show ip route
 cli alias name srr sh run | sec router
-cli alias name stcam show hardware access-list tcam region 
+cli alias name stcam show hardware access-list tcam region
 cli alias name hi sh cli history unformatted
 cli alias name snd sh nve interface nve1 detail
 line console
@@ -3308,7 +3308,7 @@ line console
   terminal length 40
   terminal width  168
 line vty
-boot nxos bootflash:/nxos64-cs-lite.10.3.5.M.bin 
+boot nxos bootflash:/nxos64-cs-lite.10.3.5.M.bin
 router isis UNDERLAY
   net 49.0001.0101.0101.1001.00
   set-overload-bit on-startup 20
@@ -3451,7 +3451,7 @@ no ip icmp rate-limit unreachable
 !
 !
 !
-!         
+!
 !
 
 
@@ -3473,7 +3473,7 @@ multilink bundle-name authenticated
 !
 !
 !
-object-group network RFC1918 
+object-group network RFC1918
  192.168.0.0 255.255.0.0
  172.16.0.0 255.240.0.0
  10.0.0.0 255.0.0.0
@@ -3494,32 +3494,32 @@ class-map type inspect match-all ALLVRF_CMAP
 !
 policy-map type inspect DEMO_TO_LABA
  class type inspect ALLVRF_CMAP
-  inspect 
+  inspect
  class class-default
   drop log
 policy-map type inspect DEMO_TO_LABA_PMAP
  class type inspect ALLVRF_CMAP
-  inspect 
+  inspect
  class class-default
   drop log
 policy-map type inspect LABA_TO_DEMO_PMAP
  class type inspect ALLVRF_CMAP
-  inspect 
+  inspect
  class class-default
   drop log
 policy-map type inspect TRANSIT_PMAP
  class type inspect ALLVRF_CMAP
-  inspect 
+  inspect
  class class-default
   drop log
 policy-map type inspect WAN_PMAP
  class type inspect ALLVRF_CMAP
-  inspect 
+  inspect
  class class-default
   drop
 policy-map type inspect LABA_TO_DEMO
  class type inspect ALLVRF_CMAP
-  inspect 
+  inspect
  class class-default
   drop log
 !
@@ -3547,7 +3547,7 @@ zone-pair security LABA_TO_WAN source LABA destination WAN
  service-policy type inspect WAN_PMAP
 zone-pair security DEMO_TO_WAN source DEMO destination WAN
  service-policy type inspect WAN_PMAP
-! 
+!
 !
 !
 !
@@ -3589,7 +3589,7 @@ interface Ethernet0/0.50
 !
 interface Ethernet0/1
  no ip address
- shutdown 
+ shutdown
  duplex auto
 !
 interface Ethernet0/2
@@ -3612,7 +3612,7 @@ interface Ethernet1/1
  no ip address
  shutdown
  duplex auto
-!         
+!
 interface Ethernet1/2
  no ip address
  shutdown
@@ -3681,7 +3681,7 @@ route-map bgp_extdef_prefer permit 10
  set local-preference 150
 !
 !
-!         
+!
 control-plane
 !
 !
@@ -3705,7 +3705,7 @@ alias exec cl clear log
 alias exec diff show archive config differences nvram:startup-config system:running-config
 alias exec shipstat show ip tra | i fragm|reass|unreach
 alias exec shp sh prot | e una|do
-alias exec zz sh policy-map type inspect zone-pair 
+alias exec zz sh policy-map type inspect zone-pair
 alias exec zs sh policy-map type inspect zone-pair ses
 !
 line con 0
@@ -3782,7 +3782,7 @@ no ip icmp rate-limit unreachable
 !
 !
 !
-!         
+!
 no ip domain lookup
 ip cef
 login on-success log
@@ -3798,14 +3798,14 @@ multilink bundle-name authenticated
 !
 !
 !
-object-group network RFC1918 
+object-group network RFC1918
  192.168.0.0 255.255.0.0
  172.16.0.0 255.240.0.0
  10.0.0.0 255.0.0.0
 !
 !
 redundancy
-!         
+!
 no cdp log mismatch duplex
 !
 ip tcp synwait-time 5
@@ -3819,42 +3819,42 @@ class-map type inspect match-all ICMP_TRACE_CMAP
 !
 policy-map type inspect DEMO_TO_TRANSIT_PMAP
  class type inspect ALLVRF_CMAP
-  inspect 
+  inspect
  class class-default
   drop log
 policy-map type inspect DEMO_TO_LABA_PMAP
  class type inspect ALLVRF_CMAP
-  inspect 
+  inspect
  class class-default
   drop log
 policy-map type inspect TRANSIT_TO_DEMO_PMAP
  class type inspect ALLVRF_CMAP
-  inspect 
+  inspect
  class class-default
   drop log
 policy-map type inspect LABA_TO_DEMO_PMAP
  class type inspect ALLVRF_CMAP
-  inspect 
+  inspect
  class class-default
   drop log
 policy-map type inspect DEMO_TRANSIT_PMAP
  class type inspect ALLVRF_CMAP
-  inspect 
+  inspect
  class class-default
   drop log
 policy-map type inspect WAN_PMAP
  class type inspect ALLVRF_CMAP
-  inspect 
+  inspect
  class class-default
   drop
 policy-map type inspect TRANSIT_TO_LABA_PMAP
  class type inspect ALLVRF_CMAP
-  inspect 
+  inspect
  class class-default
   drop log
 policy-map type inspect LABA_TRANSIT_PMAP
  class type inspect ALLVRF_CMAP
-  inspect 
+  inspect
  class class-default
   drop log
 !
@@ -3882,7 +3882,7 @@ zone-pair security LABA_TO_WAN source LABA destination WAN
  service-policy type inspect WAN_PMAP
 zone-pair security DEMO_TO_WAN source DEMO destination WAN
  service-policy type inspect WAN_PMAP
-! 
+!
 !
 !
 !
@@ -4058,7 +4058,7 @@ alias exec cl clear log
 alias exec diff show archive config differences nvram:startup-config system:running-config
 alias exec shipstat show ip tra | i fragm|reass|unreach
 alias exec shp sh prot | e una|do
-alias exec zz sh policy-map type inspect zone-pair 
+alias exec zz sh policy-map type inspect zone-pair
 alias exec zs sh policy-map type inspect zone-pair ses
 !
 line con 0
@@ -4091,7 +4091,7 @@ C2L-Bgw-R1# sh run
 !Running configuration last done at: Mon Feb 17 16:14:21 2025
 !Time: Mon Feb 17 18:16:04 2025
 
-version 10.3(5) Bios:version  
+version 10.3(5) Bios:version
 hostname C2L-Bgw-R1
 vdc C2L-Bgw-R1 id 1
   limit-resource vlan minimum 16 maximum 4094
@@ -4147,16 +4147,16 @@ vlan 1330
 vlan 1350
   name VL50TOROUTER
 
-ip prefix-list bgp_only_host seq 10 permit 0.0.0.0/0 eq 32 
+ip prefix-list bgp_only_host seq 10 permit 0.0.0.0/0 eq 32
 ip prefix-list bgp_only_net description Allow only CIDR prefix
-ip prefix-list bgp_only_net seq 5 deny 0.0.0.0/0 
-ip prefix-list bgp_only_net seq 10 deny 0.0.0.0/0 eq 32 
-ip prefix-list bgp_only_net seq 20 permit 0.0.0.0/0 le 31 
+ip prefix-list bgp_only_net seq 5 deny 0.0.0.0/0
+ip prefix-list bgp_only_net seq 10 deny 0.0.0.0/0 eq 32
+ip prefix-list bgp_only_net seq 20 permit 0.0.0.0/0 le 31
 ip prefix-list only_32_prefix description Allow only client host ip as /32 prefix
-ip prefix-list only_32_prefix seq 10 permit 0.0.0.0/0 eq 32 
+ip prefix-list only_32_prefix seq 10 permit 0.0.0.0/0 eq 32
 ip prefix-list outbound-no-host description Allow only CIDR prefix send to router
-ip prefix-list outbound-no-host seq 10 deny 0.0.0.0/0 eq 32 
-ip prefix-list outbound-no-host seq 20 permit 0.0.0.0/0 le 32 
+ip prefix-list outbound-no-host seq 10 deny 0.0.0.0/0 eq 32
+ip prefix-list outbound-no-host seq 20 permit 0.0.0.0/0 le 32
 ip as-path access-list BGP_ONLY_INTERNAL seq 1 permit "^$"
 ip as-path access-list bgp_trans_in seq 10 permit "_2222$"
 ip as-path access-list bgp_trans_out seq 10 permit "_1111$"
@@ -4166,12 +4166,12 @@ route-map BGP_NO_PREF permit 10
   set local-preference 50
 route-map RM-BGP-DIRECT permit 10
 route-map bgp_static_default permit 10
-  match tag 202 
+  match tag 202
 route-map only_32_prefix_to_transit permit 10
-  match ip address prefix-list only_32_prefix 
+  match ip address prefix-list only_32_prefix
 route-map only_ext32_prefix_from_transit permit 10
-  match ip address prefix-list only_32_prefix 
-  match evpn route-type 5 
+  match ip address prefix-list only_32_prefix
+  match evpn route-type 5
 key chain ISIS
   key 1
     key-string 7 072c0e681c
@@ -4470,7 +4470,7 @@ line console
   terminal length 40
   terminal width  168
 line vty
-boot nxos bootflash:/nxos64-cs-lite.10.3.5.M.bin 
+boot nxos bootflash:/nxos64-cs-lite.10.3.5.M.bin
 router isis UNDERLAY
   net 49.0002.0101.0201.1001.00
   log-adjacency-changes
@@ -4562,7 +4562,7 @@ C2L-Spine-R1# sh run
 !Running configuration last done at: Wed Feb 12 06:49:20 2025
 !Time: Wed Feb 12 08:21:19 2025
 
-version 10.3(5) Bios:version  
+version 10.3(5) Bios:version
 hostname C2L-Spine-R1
 vdc C2L-Spine-R1 id 1
   limit-resource vlan minimum 16 maximum 4094
@@ -4776,7 +4776,7 @@ interface loopback2
 cli alias name wr copy run start
 cli alias name c conf term
 cli alias name sir show ip route
-cli alias name cef show forwarding ipv4 
+cli alias name cef show forwarding ipv4
 cli alias name adj show ip adj
 cli alias name srr sh run | sec router
 cli alias name hi sh cli history unformatted
@@ -4785,7 +4785,7 @@ line console
   terminal length 40
   terminal width  168
 line vty
-boot nxos bootflash:/nxos64-cs-lite.10.3.5.M.bin 
+boot nxos bootflash:/nxos64-cs-lite.10.3.5.M.bin
 router isis UNDERLAY
   net 49.0002.0101.0221.1001.00
   set-overload-bit on-startup 20
@@ -4832,7 +4832,7 @@ C2L-Leaf-R1# sh run
 !Running configuration last done at: Sun Feb 16 21:13:55 2025
 !Time: Mon Feb 17 18:06:37 2025
 
-version 10.3(5) Bios:version  
+version 10.3(5) Bios:version
 hostname C2L-Leaf-R1
 vdc C2L-Leaf-R1 id 1
   limit-resource vlan minimum 16 maximum 4094
@@ -4878,13 +4878,13 @@ ip as-path access-list BGP_ONLY_INTERNAL seq 1 permit "^$"
 ip as-path access-list blockLocalFw seq 10 permit "^2222_"
 route-map RM_PERMIT_IPv4 permit 10
 route-map SETCMNT permit 10
-  set tag 21012 
-  set extcommunity rt 22:22 additive 
+  set tag 21012
+  set extcommunity rt 22:22 additive
 route-map SETHMM permit 10
-  set community 20:0 
+  set community 20:0
 route-map bgpLocal deny 10
-  match interface vni51050 
-  match evpn route-type 5 
+  match interface vni51050
+  match evpn route-type 5
 route-map bgpLocal permit 100
 route-map fabric-rmap-redist-subnet permit 10
 route-map testme permit 10
@@ -5160,7 +5160,7 @@ line console
   terminal length 40
   terminal width  168
 line vty
-boot nxos bootflash:/nxos64-cs-lite.10.3.5.M.bin 
+boot nxos bootflash:/nxos64-cs-lite.10.3.5.M.bin
 router isis UNDERLAY
   net 49.0002.0101.0211.1001.00
   is-type level-1
@@ -5199,7 +5199,7 @@ router bgp 65012
 
 
 
-C2L-Leaf-R1# 
+C2L-Leaf-R1#
 ```
 
 </details>
@@ -5370,7 +5370,7 @@ router bgp 1111
   neighbor 10.101.220.2 remote-as 65010
   neighbor 10.101.220.2 ebgp-multihop 5
   neighbor 10.101.220.2 update-source Loopback10
-  neighbor 10.101.220.2 as-override  
+  neighbor 10.101.220.2 as-override
 ```
 
 Да, тут для каждого VRF я создал на файрволе по своему Loopack:
@@ -5421,8 +5421,8 @@ router bgp 65010
 ```text
 C1L-Bgw-R1# sh ip bgp summary vrf laba | b Neighbor
 Neighbor        V    AS    MsgRcvd    MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
-10.10.220.46    4 65010        412        401       60    0    0 06:36:25 9         
-10.101.220.254  4  1111       4235       4083       60    0    0 07:56:19 5         
+10.10.220.46    4 65010        412        401       60    0    0 06:36:25 9
+10.101.220.254  4  1111       4235       4083       60    0    0 07:56:19 5
 C1L-Bgw-R1#
 ```
 
@@ -5444,7 +5444,7 @@ C1L-Bgw-R1# sh run
 !Running configuration last done at: Thu Feb 20 01:33:24 2025
 !Time: Thu Feb 20 02:04:11 2025
 
-version 10.3(5) Bios:version  
+version 10.3(5) Bios:version
 hostname C1L-Bgw-R1
 vdc C1L-Bgw-R1 id 1
   limit-resource vlan minimum 16 maximum 4094
@@ -5506,15 +5506,15 @@ vlan 1350
   name VL50TOROUTER
 
 spanning-tree vlan 1-3967 priority 4096
-ip prefix-list bgp_only_host seq 10 permit 0.0.0.0/0 eq 32 
-ip prefix-list bgp_only_net seq 5 deny 0.0.0.0/0 
-ip prefix-list bgp_only_net seq 10 deny 0.0.0.0/0 eq 32 
-ip prefix-list bgp_only_net seq 20 permit 0.0.0.0/0 le 31 
+ip prefix-list bgp_only_host seq 10 permit 0.0.0.0/0 eq 32
+ip prefix-list bgp_only_net seq 5 deny 0.0.0.0/0
+ip prefix-list bgp_only_net seq 10 deny 0.0.0.0/0 eq 32
+ip prefix-list bgp_only_net seq 20 permit 0.0.0.0/0 le 31
 ip prefix-list only_32_prefix description Allow only client host ip as /32 prefix
-ip prefix-list only_32_prefix seq 10 permit 0.0.0.0/0 eq 32 
+ip prefix-list only_32_prefix seq 10 permit 0.0.0.0/0 eq 32
 ip prefix-list outbound-no-host description Allow only CIDR prefix send to router
-ip prefix-list outbound-no-host seq 10 deny 0.0.0.0/0 eq 32 
-ip prefix-list outbound-no-host seq 20 permit 0.0.0.0/0 le 31 
+ip prefix-list outbound-no-host seq 10 deny 0.0.0.0/0 eq 32
+ip prefix-list outbound-no-host seq 20 permit 0.0.0.0/0 le 31
 ip as-path access-list BGP_ONLY_INTERNAL seq 1 permit "^$"
 ip as-path access-list bgp_trans_in seq 10 permit "_1111$"
 ip as-path access-list bgp_trans_out seq 10 permit "_2222$"
@@ -5525,21 +5525,21 @@ route-map BGP_LOCAL_PREF permit 10
   set local-preference 100
 route-map RM-BGP-DIRECT permit 10
 route-map bgp_static_default permit 10
-  match tag 201 
+  match tag 201
 route-map bgp_trans_pref permit 10
   set local-preference 50
 route-map only_32_prefix_external permit 10
-  match as-path only_extenal_as 
-  match ip address prefix-list only_32_prefix 
+  match as-path only_extenal_as
+  match ip address prefix-list only_32_prefix
 route-map only_32_prefix_external deny 20
-  match as-path only_extenal_as 
+  match as-path only_extenal_as
 route-map only_32_prefix_external permit 50
 route-map only_32_prefix_to_transit permit 10
-  match ip address prefix-list only_32_prefix 
-  match evpn route-type 5 
+  match ip address prefix-list only_32_prefix
+  match evpn route-type 5
 route-map only_ext32_prefix_from_transit permit 10
-  match ip address prefix-list only_32_prefix 
-  match evpn route-type 5 
+  match ip address prefix-list only_32_prefix
+  match evpn route-type 5
 key chain ISIS
   key 1
     key-string 7 070c285f4d064b0916100a
@@ -5957,7 +5957,7 @@ cli alias name wr copy run start
 cli alias name c conf term
 cli alias name sir show ip route
 cli alias name srr sh run | sec router
-cli alias name stcam show hardware access-list tcam region 
+cli alias name stcam show hardware access-list tcam region
 cli alias name hi sh cli history unformatted
 cli alias name snd sh nve interface nve1 detail
 line console
@@ -5965,7 +5965,7 @@ line console
   terminal length 40
   terminal width  168
 line vty
-boot nxos bootflash:/nxos64-cs-lite.10.3.5.M.bin 
+boot nxos bootflash:/nxos64-cs-lite.10.3.5.M.bin
 router isis UNDERLAY
   net 49.0001.0101.0101.1001.00
   set-overload-bit on-startup 20
@@ -6104,7 +6104,7 @@ C1L-BGW-R2# sh run
 !Running configuration last done at: Thu Feb 20 01:33:14 2025
 !Time: Thu Feb 20 02:05:28 2025
 
-version 10.3(5) Bios:version  
+version 10.3(5) Bios:version
 hostname C1L-BGW-R2
 vdc C1L-BGW-R2 id 1
   limit-resource vlan minimum 16 maximum 4094
@@ -6166,15 +6166,15 @@ vlan 1350
   name VL50TOROUTER
 
 spanning-tree vlan 1-3967 priority 8192
-ip prefix-list bgp_only_host seq 10 permit 0.0.0.0/0 eq 32 
-ip prefix-list bgp_only_net seq 5 deny 0.0.0.0/0 
-ip prefix-list bgp_only_net seq 10 deny 0.0.0.0/0 eq 32 
-ip prefix-list bgp_only_net seq 20 permit 0.0.0.0/0 le 31 
+ip prefix-list bgp_only_host seq 10 permit 0.0.0.0/0 eq 32
+ip prefix-list bgp_only_net seq 5 deny 0.0.0.0/0
+ip prefix-list bgp_only_net seq 10 deny 0.0.0.0/0 eq 32
+ip prefix-list bgp_only_net seq 20 permit 0.0.0.0/0 le 31
 ip prefix-list only_32_prefix description Allow only client host ip as /32 prefix
-ip prefix-list only_32_prefix seq 10 permit 0.0.0.0/0 eq 32 
+ip prefix-list only_32_prefix seq 10 permit 0.0.0.0/0 eq 32
 ip prefix-list outbound-no-host description Allow only CIDR prefix send to router
-ip prefix-list outbound-no-host seq 10 deny 0.0.0.0/0 eq 32 
-ip prefix-list outbound-no-host seq 20 permit 0.0.0.0/0 le 31 
+ip prefix-list outbound-no-host seq 10 deny 0.0.0.0/0 eq 32
+ip prefix-list outbound-no-host seq 20 permit 0.0.0.0/0 le 31
 ip as-path access-list BGP_ONLY_INTERNAL seq 1 permit "^$"
 ip as-path access-list bgp_trans_in seq 10 permit "_1111$"
 ip as-path access-list bgp_trans_out seq 10 permit "_2222$"
@@ -6185,21 +6185,21 @@ route-map BGP_LOCAL_PREF permit 10
   set local-preference 100
 route-map RM-BGP-DIRECT permit 10
 route-map bgp_static_default permit 10
-  match tag 201 
+  match tag 201
 route-map bgp_trans_pref permit 10
   set local-preference 50
 route-map only_32_prefix_external permit 10
-  match as-path only_extenal_as 
-  match ip address prefix-list only_32_prefix 
+  match as-path only_extenal_as
+  match ip address prefix-list only_32_prefix
 route-map only_32_prefix_external deny 20
-  match as-path only_extenal_as 
+  match as-path only_extenal_as
 route-map only_32_prefix_external permit 50
 route-map only_32_prefix_to_transit permit 10
-  match ip address prefix-list only_32_prefix 
-  match evpn route-type 5 
+  match ip address prefix-list only_32_prefix
+  match evpn route-type 5
 route-map only_ext32_prefix_from_transit permit 10
-  match ip address prefix-list only_32_prefix 
-  match evpn route-type 5 
+  match ip address prefix-list only_32_prefix
+  match evpn route-type 5
 key chain ISIS
   key 1
     key-string 7 070c285f4d064b0916100a
@@ -6606,14 +6606,14 @@ cli alias name wr copy run start
 cli alias name c conf term
 cli alias name sir show ip route
 cli alias name srr sh run | sec router
-cli alias name stcam show hardware access-list tcam region 
+cli alias name stcam show hardware access-list tcam region
 cli alias name hi sh cli history unformatted
 line console
   exec-timeout 0
   terminal length 40
   terminal width  168
 line vty
-boot nxos bootflash:/nxos64-cs-lite.10.3.5.M.bin 
+boot nxos bootflash:/nxos64-cs-lite.10.3.5.M.bin
 router isis UNDERLAY
   net 49.0001.0101.0102.1001.00
   set-overload-bit on-startup 20
@@ -6724,7 +6724,7 @@ router bgp 65010
 logging console 4
 
 
-C1L-BGW-R2# 
+C1L-BGW-R2#
 ```
 
 </details>
@@ -6781,7 +6781,7 @@ no ip icmp rate-limit unreachable
 !
 !
 !
-!         
+!
 !
 
 
@@ -6803,7 +6803,7 @@ multilink bundle-name authenticated
 !
 !
 !
-object-group network RFC1918 
+object-group network RFC1918
  192.168.0.0 255.255.0.0
  172.16.0.0 255.240.0.0
  10.0.0.0 255.0.0.0
@@ -6824,32 +6824,32 @@ class-map type inspect match-all ALLVRF_CMAP
 !
 policy-map type inspect DEMO_TO_LABA
  class type inspect ALLVRF_CMAP
-  inspect 
+  inspect
  class class-default
   drop log
 policy-map type inspect DEMO_TO_LABA_PMAP
  class type inspect ALLVRF_CMAP
-  inspect 
+  inspect
  class class-default
   drop log
 policy-map type inspect LABA_TO_DEMO_PMAP
  class type inspect ALLVRF_CMAP
-  inspect 
+  inspect
  class class-default
   drop log
 policy-map type inspect TRANSIT_PMAP
  class type inspect ALLVRF_CMAP
-  inspect 
+  inspect
  class class-default
   drop log
 policy-map type inspect WAN_PMAP
  class type inspect ALLVRF_CMAP
-  inspect 
+  inspect
  class class-default
   drop
 policy-map type inspect LABA_TO_DEMO
  class type inspect ALLVRF_CMAP
-  inspect 
+  inspect
  class class-default
   drop log
 !
@@ -6877,7 +6877,7 @@ zone-pair security LABA_TO_WAN source LABA destination WAN
  service-policy type inspect WAN_PMAP
 zone-pair security DEMO_TO_WAN source DEMO destination WAN
  service-policy type inspect WAN_PMAP
-! 
+!
 !
 !
 !
@@ -7011,7 +7011,7 @@ router bgp 1111
  neighbor 172.24.1.49 as-override
 !
 ip forward-protocol nd
-!         
+!
 ip bgp-community new-format
 !
 no ip http server
@@ -7068,7 +7068,7 @@ alias exec cl clear log
 alias exec diff show archive config differences nvram:startup-config system:running-config
 alias exec shipstat show ip tra | i fragm|reass|unreach
 alias exec shp sh prot | e una|do
-alias exec zz sh policy-map type inspect zone-pair 
+alias exec zz sh policy-map type inspect zone-pair
 alias exec zs sh policy-map type inspect zone-pair ses
 !
 line con 0
@@ -7101,7 +7101,7 @@ C2L-Bgw-R1# sh run
 !Running configuration last done at: Thu Feb 20 00:42:31 2025
 !Time: Thu Feb 20 02:03:59 2025
 
-version 10.3(5) Bios:version  
+version 10.3(5) Bios:version
 hostname C2L-Bgw-R1
 vdc C2L-Bgw-R1 id 1
   limit-resource vlan minimum 16 maximum 4094
@@ -7157,16 +7157,16 @@ vlan 1330
 vlan 1350
   name VL50TOROUTER
 
-ip prefix-list bgp_only_host seq 10 permit 0.0.0.0/0 eq 32 
+ip prefix-list bgp_only_host seq 10 permit 0.0.0.0/0 eq 32
 ip prefix-list bgp_only_net description Allow only CIDR prefix
-ip prefix-list bgp_only_net seq 5 deny 0.0.0.0/0 
-ip prefix-list bgp_only_net seq 10 deny 0.0.0.0/0 eq 32 
-ip prefix-list bgp_only_net seq 20 permit 0.0.0.0/0 le 31 
+ip prefix-list bgp_only_net seq 5 deny 0.0.0.0/0
+ip prefix-list bgp_only_net seq 10 deny 0.0.0.0/0 eq 32
+ip prefix-list bgp_only_net seq 20 permit 0.0.0.0/0 le 31
 ip prefix-list only_32_prefix description Allow only client host ip as /32 prefix
-ip prefix-list only_32_prefix seq 10 permit 0.0.0.0/0 eq 32 
+ip prefix-list only_32_prefix seq 10 permit 0.0.0.0/0 eq 32
 ip prefix-list outbound-no-host description Allow only CIDR prefix send to router
-ip prefix-list outbound-no-host seq 10 deny 0.0.0.0/0 eq 32 
-ip prefix-list outbound-no-host seq 20 permit 0.0.0.0/0 le 32 
+ip prefix-list outbound-no-host seq 10 deny 0.0.0.0/0 eq 32
+ip prefix-list outbound-no-host seq 20 permit 0.0.0.0/0 le 32
 ip as-path access-list BGP_ONLY_INTERNAL seq 1 permit "^$"
 ip as-path access-list bgp_trans_in seq 10 permit "_2222$"
 ip as-path access-list bgp_trans_out seq 10 permit "_1111$"
@@ -7176,12 +7176,12 @@ route-map BGP_NO_PREF permit 10
   set local-preference 50
 route-map RM-BGP-DIRECT permit 10
 route-map bgp_static_default permit 10
-  match tag 202 
+  match tag 202
 route-map only_32_prefix_to_transit permit 10
-  match ip address prefix-list only_32_prefix 
+  match ip address prefix-list only_32_prefix
 route-map only_ext32_prefix_from_transit permit 10
-  match ip address prefix-list only_32_prefix 
-  match evpn route-type 5 
+  match ip address prefix-list only_32_prefix
+  match evpn route-type 5
 key chain ISIS
   key 1
     key-string 7 072c0e681c
@@ -7490,7 +7490,7 @@ line console
   terminal length 40
   terminal width  168
 line vty
-boot nxos bootflash:/nxos64-cs-lite.10.3.5.M.bin 
+boot nxos bootflash:/nxos64-cs-lite.10.3.5.M.bin
 router isis UNDERLAY
   net 49.0002.0101.0201.1001.00
   log-adjacency-changes
@@ -7648,7 +7648,7 @@ feature evmed
 !Running configuration last done at: Mon Feb 24 03:58:05 2025
 !Time: Mon Feb 24 15:19:10 2025
 
-version 10.3(5) Bios:version  
+version 10.3(5) Bios:version
 event manager applet FW_OFF
   description "Bypass Firewall with VRF Leaking"
   event none
@@ -7663,7 +7663,7 @@ event manager applet FW_ON
   action 3.0 cli local exit
 
 
-C2-Bgw-R1# 
+C2-Bgw-R1#
 ```
 
 Редактировать файлы локально на флешке:
@@ -7673,3 +7673,7 @@ C2-Bgw-R1# run bash
 $ export TERM=ansi
 $ vi /bootflash/firewall_off.py
 ```
+
+### Добавлена текущая схема с vPC
+
+[тут, на 04.03.2026](vPC/README.md)
